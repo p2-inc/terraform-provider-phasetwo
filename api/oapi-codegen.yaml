@@ -1,0 +1,14 @@
+package: client
+output: ../internal/client/generated.go
+generate:
+  models: true
+  # Emits both the raw Client and ClientWithResponses. The latter parses each documented 2xx into
+  # a JSONxxx field, so the hand-written layer never decodes a body itself — only worth having
+  # because every non-bodiless response in the spec now declares a content schema.
+  client: true
+output-options:
+  # The spec's operationIds are dotted (`cluster.envVar.list`), which oapi-codegen turns into
+  # Go names by stripping the separators — `ClusterEnvVarList`. That is the naming this provider
+  # calls against; see internal/client for the thin wrapper over it.
+  skip-prune: true
+  nullable-type: true

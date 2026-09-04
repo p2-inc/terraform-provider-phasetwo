@@ -1,0 +1,1 @@
+terraform import phasetwo_cluster_extension.custom_authenticator 4f8c1e2a-0000-0000-0000-000000000000/2b3c4d5e-0000-0000-0000-000000000000

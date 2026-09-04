@@ -1,0 +1,1 @@
+terraform import phasetwo_cluster_domain.auth 4f8c1e2a-0000-0000-0000-000000000000/7d2e9f10-0000-0000-0000-000000000000

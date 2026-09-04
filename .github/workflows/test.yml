@@ -1,0 +1,101 @@
+name: Tests
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go build -v ./...
+      - name: Check gofmt
+        run: |
+          unformatted="$(gofmt -s -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt -s -w:"
+            echo "$unformatted"
+            exit 1
+          fi
+      - run: go vet ./...
+
+  generate:
+    name: Generated files are up to date
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: make generate docs
+      - name: Fail if anything changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Generated files are stale. Run 'make generate docs' and commit the result."
+            git diff
+            exit 1
+          fi
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - run: go test ./... -timeout=120s -race -coverprofile=coverage.out
+      - run: go tool cover -func=coverage.out | tail -1
+
+  # Acceptance tests create and destroy real, billable infrastructure, so they are opt-in rather
+  # than part of every PR. Run them from the Actions tab before cutting a release.
+  testacc:
+    name: Acceptance tests
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform: ['1.8.*', '1.9.*', '1.10.*']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - env:
+          TF_ACC: '1'
+          PHASETWO_ENVIRONMENT: app-staging
+          PHASETWO_CLIENT_ID: ${{ secrets.PHASETWO_CLIENT_ID }}
+          PHASETWO_CLIENT_SECRET: ${{ secrets.PHASETWO_CLIENT_SECRET }}
+          PHASETWO_TEST_ORG_ID: ${{ secrets.PHASETWO_TEST_ORG_ID }}
+          PHASETWO_TEST_PAYMENT_METHOD_ID: ${{ secrets.PHASETWO_TEST_PAYMENT_METHOD_ID }}
+        run: go test ./... -v -timeout=180m

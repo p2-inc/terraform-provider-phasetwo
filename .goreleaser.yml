@@ -1,0 +1,70 @@
+version: 2
+
+# Release process for the Terraform Registry. The registry expects, for each tag:
+#   - one zip per OS/arch, named terraform-provider-{NAME}_{VERSION}_{OS}_{ARCH}.zip
+#   - a _SHA256SUMS file and a GPG detached signature of it
+#   - terraform-registry-manifest.json, renamed to {NAME}_{VERSION}_manifest.json
+# The GPG key's public half must be registered in the registry's namespace settings.
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    mod_timestamp: '{{ .CommitTimestamp }}'
+    flags:
+      - -trimpath
+    ldflags:
+      - '-s -w -X main.version={{.Version}}'
+    goos:
+      - darwin
+      - freebsd
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - '386'
+      - arm
+      - arm64
+    ignore:
+      # Combinations Terraform does not ship for.
+      - goos: darwin
+        goarch: '386'
+      - goos: darwin
+        goarch: arm
+    binary: '{{ .ProjectName }}_v{{ .Version }}'
+
+archives:
+  - formats: [zip]
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+  extra_files:
+    - glob: 'terraform-registry-manifest.json'
+      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+
+signs:
+  - artifacts: checksum
+    args:
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}"
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+
+release:
+  extra_files:
+    - glob: 'terraform-registry-manifest.json'
+      name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
+  # The registry ingests a release once it is published, so drafts stay out of its way until the
+  # artifacts are complete.
+  draft: false
+
+changelog:
+  disable: true
