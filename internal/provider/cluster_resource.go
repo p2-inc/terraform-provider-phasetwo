@@ -216,6 +216,7 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 		var actionErr *api.ErrPaymentActionRequired
 		if errors.As(err, &actionErr) && actionErr.CreatedClusterID != "" {
 			plan.ID = types.StringValue(actionErr.CreatedClusterID)
+			plan.markComputedUnset()
 			resp.State.Set(ctx, &plan)
 			resp.Diagnostics.AddError(
 				"Cluster created but payment needs confirmation",
@@ -242,8 +243,12 @@ func (r *clusterResource) Create(ctx context.Context, req resource.CreateRequest
 
 	// Record the id before waiting. Provisioning can take a while, and if the wait fails or the
 	// operator interrupts it, the cluster must not be lost from state.
+	partial := plan
+	partial.ID = types.StringValue(cluster.Id)
+	partial.markComputedUnset()
+	resp.State.Set(ctx, &partial)
+
 	plan.ID = types.StringValue(cluster.Id)
-	resp.State.Set(ctx, &plan)
 
 	cluster, err = r.client.WaitForClusterActive(ctx, cluster.Id, timeout)
 	if err != nil {
@@ -344,6 +349,21 @@ func (r *clusterResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 func (r *clusterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+// markComputedUnset nulls every computed attribute.
+//
+// It is used before persisting a partial result mid-Create. Straight after a create these
+// attributes are still unknown, and Terraform state cannot hold unknown values — writing them
+// would produce a state Terraform core rejects, losing the very id the early save exists to
+// keep. Null is the correct stand-in: not yet read.
+func (m *clusterModel) markComputedUnset() {
+	m.Host = types.StringNull()
+	m.Status = types.StringNull()
+	m.Owner = types.StringNull()
+	m.Variant = types.StringNull()
+	m.ResourceLimits = types.StringNull()
+	m.CreatedAt = types.StringNull()
 }
 
 // apply copies an API cluster onto the model. payment_method_id and billing_period are not

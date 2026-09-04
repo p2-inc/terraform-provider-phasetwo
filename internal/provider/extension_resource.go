@@ -123,8 +123,14 @@ func (r *extensionResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
+	// Record the id before the follow-up calls. created_at is still unknown here and state
+	// cannot hold unknowns, so it goes in as null; see the note on clusterModel.
+	partial := plan
+	partial.ID = types.StringValue(id)
+	partial.CreatedAt = types.StringNull()
+	resp.State.Set(ctx, &partial)
+
 	plan.ID = types.StringValue(id)
-	resp.State.Set(ctx, &plan)
 
 	// The API creates extensions enabled. Only call the toggle when that is not what was asked
 	// for, to avoid a pointless write.

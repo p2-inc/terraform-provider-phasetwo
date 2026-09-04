@@ -141,9 +141,15 @@ func (r *realmResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 
-	// Persist the id before the wait, so an interrupted apply does not orphan the realm.
+	// Persist the id before the wait, so an interrupted apply does not orphan the realm. The
+	// computed attributes are still unknown at this point and state cannot hold unknowns, so
+	// they go in as null.
+	partial := plan
+	partial.ID = types.StringValue(id)
+	partial.markComputedUnset()
+	resp.State.Set(ctx, &partial)
+
 	plan.ID = types.StringValue(id)
-	resp.State.Set(ctx, &plan)
 
 	realm, err := r.client.WaitForRealmActive(ctx, id, timeout)
 	if err != nil {
@@ -241,6 +247,16 @@ func (r *realmResource) ImportState(ctx context.Context, req resource.ImportStat
 		id = parts[1]
 	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), id)...)
+}
+
+// markComputedUnset nulls every computed attribute; see the note on clusterModel.
+func (m *realmModel) markComputedUnset() {
+	m.State = types.StringNull()
+	m.StateError = types.StringNull()
+	m.Region = types.StringNull()
+	m.OrganizationID = types.StringNull()
+	m.CreatedByUserID = types.StringNull()
+	m.CreatedAt = types.StringNull()
 }
 
 func (r *realmResource) apply(m *realmModel, d *client.Deployment) {
