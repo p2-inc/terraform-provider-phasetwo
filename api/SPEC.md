@@ -7,11 +7,10 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `1d88a78fb60aaad872c611d8e3d2d7ad30f3a2d0` |
-| Branch at pin | `xgp/openapi-spec-fixes-for-terraform` (PR #638, targeting `dev`) |
+| Pinned commit | `0b179d6ad69fe687d79031e49d6f09f23c23c0e4` |
+| Branch at pin | `dev` (merge of PR #638) |
 
-**This pin is provisional.** It points at a PR branch, not a merged commit. Re-pin to the merge
-commit of p2-inc/phasetwo-keycloak#638 once it lands on `dev`, then regenerate.
+Rebuilding from that commit reproduces this file byte for byte.
 
 ## Refreshing
 
