@@ -40,7 +40,7 @@ resource "phasetwo_cluster" "main" {
   organization_id   = data.phasetwo_organization.team.id
   payment_method_id = data.phasetwo_payment_method.default.id
 
-  timeouts {
+  timeouts = {
     create = "60m"
   }
 }
