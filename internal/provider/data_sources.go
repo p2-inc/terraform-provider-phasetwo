@@ -393,7 +393,7 @@ func (d *regionsDataSource) Read(ctx context.Context, _ datasource.ReadRequest, 
 
 	names := make([]string, 0, len(regions))
 	for _, r := range regions {
-		names = append(names, string(r))
+		names = append(names, r.Name)
 	}
 	list, diags := types.ListValueFrom(ctx, types.StringType, names)
 	resp.Diagnostics.Append(diags...)

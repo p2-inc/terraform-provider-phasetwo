@@ -12,7 +12,8 @@ import (
 
 const activeClusterJSON = `{
   "id": "c1", "name": "demo", "host": "https://demo.global.auth.ac",
-  "region": "US_EAST_1", "status": "ACTIVE", "tier": "starter",
+  "region": {"name": "US_EAST_1", "provider": "aws", "region": "us-east-1"},
+  "status": "ACTIVE", "tier": "starter",
   "resource_limits": "standard", "created_at": 1740000000000, "owner": "org1"
 }`
 
@@ -98,7 +99,8 @@ func TestWaitForClusterActiveFailsFastOnBillingStates(t *testing.T) {
 		t.Run(state, func(t *testing.T) {
 			c, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				_, _ = w.Write([]byte(`{"id":"c1","name":"demo","host":"h","region":"US_EAST_1",` +
+				_, _ = w.Write([]byte(`{"id":"c1","name":"demo","host":"h",` +
+					`"region":{"name":"US_EAST_1","provider":"aws","region":"us-east-1"},` +
 					`"status":"` + state + `","tier":"starter","resource_limits":"standard",` +
 					`"created_at":1}`))
 			}))
@@ -147,7 +149,8 @@ func TestWaitForClusterGoneOn404(t *testing.T) {
 func TestWaitForClusterGoneReportsPendingDeletion(t *testing.T) {
 	c, _ := newTestClient(t, http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"id":"c1","name":"demo","host":"h","region":"US_EAST_1",` +
+		_, _ = w.Write([]byte(`{"id":"c1","name":"demo","host":"h",` +
+			`"region":{"name":"US_EAST_1","provider":"aws","region":"us-east-1"},` +
 			`"status":"PENDING_DELETION","tier":"starter","resource_limits":"standard","created_at":1}`))
 	}))
 	last, err := c.WaitForClusterGone(context.Background(), "c1", time0)

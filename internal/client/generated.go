@@ -244,42 +244,6 @@ func (e EnvironmentVariableType) Valid() bool {
 	}
 }
 
-// Defines values for Region.
-const (
-	APSOUTH1     Region = "AP_SOUTH_1"
-	APSOUTHEAST1 Region = "AP_SOUTHEAST_1"
-	DEV          Region = "DEV"
-	EUCENTRAL1   Region = "EU_CENTRAL_1"
-	EUWEST1      Region = "EU_WEST_1"
-	LOCAL        Region = "LOCAL"
-	USEAST1      Region = "US_EAST_1"
-	USWEST2      Region = "US_WEST_2"
-)
-
-// Valid indicates whether the value is a known member of the Region enum.
-func (e Region) Valid() bool {
-	switch e {
-	case APSOUTH1:
-		return true
-	case APSOUTHEAST1:
-		return true
-	case DEV:
-		return true
-	case EUCENTRAL1:
-		return true
-	case EUWEST1:
-		return true
-	case LOCAL:
-		return true
-	case USEAST1:
-		return true
-	case USWEST2:
-		return true
-	default:
-		return false
-	}
-}
-
 // Defines values for ResourceLimits.
 const (
 	Custom   ResourceLimits = "custom"
@@ -397,7 +361,16 @@ type Cluster struct {
 	Owner *string `json:"owner,omitempty"`
 
 	// Region Region the cluster is provisioned in.
-	Region Region `json:"region"`
+	Region struct {
+		// Name Region identifier, usable as the `region` argument when creating a cluster.
+		Name string `json:"name"`
+
+		// Provider Cloud provider hosting this region.
+		Provider string `json:"provider"`
+
+		// Region Provider-specific region code.
+		Region string `json:"region"`
+	} `json:"region"`
 
 	// ResourceLimits `STANDARD`, or `CUSTOM` when the cluster has been exempted from tier count limits.
 	ResourceLimits ResourceLimits `json:"resource_limits"`
@@ -826,6 +799,9 @@ type PaymentMethod struct {
 	// Id Stripe payment method ID. Pass this as `payment_method_id` when creating a cluster.
 	Id string `json:"id"`
 
+	// InUseBy Names of the clusters whose active subscription is billed to this payment method. May be empty even when in_use_by_active_subscription is true, if the subscription isn't tied to a cluster.
+	InUseBy *[]string `json:"in_use_by,omitempty"`
+
 	// InUseByActiveSubscription Whether an active subscription is currently billed to this payment method. Such a payment method cannot be removed until the subscription is moved to another card.
 	InUseByActiveSubscription bool `json:"in_use_by_active_subscription"`
 
@@ -866,8 +842,17 @@ type RedirectRequest struct {
 	RedirectUri *string `json:"redirect_uri,omitempty"`
 }
 
-// Region defines model for Region.
-type Region string
+// Region A region a cluster can be provisioned in.
+type Region struct {
+	// Name Region identifier, usable as the `region` argument when creating a cluster.
+	Name string `json:"name"`
+
+	// Provider Cloud provider hosting this region.
+	Provider string `json:"provider"`
+
+	// Region Provider-specific region code.
+	Region string `json:"region"`
+}
 
 // ResourceLimits defines model for ResourceLimits.
 type ResourceLimits string

@@ -132,7 +132,7 @@ func (d *clusterDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	cfg.ID = types.StringValue(found.Id)
 	cfg.Name = types.StringValue(found.Name)
 	cfg.Host = types.StringValue(found.Host)
-	cfg.Region = types.StringValue(string(found.Region))
+	cfg.Region = types.StringValue(found.Region.Name)
 	cfg.Status = types.StringValue(string(found.Status))
 	cfg.Tier = types.StringValue(string(found.Tier))
 	cfg.ResourceLimits = types.StringValue(string(found.ResourceLimits))
