@@ -88,6 +88,10 @@ type Client struct {
 // New builds a Client. It does not contact the network: with client credentials the token is
 // fetched lazily on the first call, so a bad secret surfaces as a failed API call rather than a
 // failed provider configuration.
+//
+// ctx is retained for the life of the returned Client and reused for every future token refresh,
+// so it must outlive this call — never pass a context scoped to a single RPC (such as a
+// terraform-plugin-framework Configure context, which is canceled as soon as Configure returns).
 func New(ctx context.Context, cfg Config) (*Client, error) {
 	if cfg.AccessToken == "" && (cfg.ClientID == "" || cfg.ClientSecret == "") {
 		return nil, errors.New("either access_token or both client_id and client_secret must be set")
