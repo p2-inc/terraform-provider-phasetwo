@@ -7,13 +7,12 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `9b494703` |
-| Branch at pin | `fix/region-openapi-schema` ([PR #660](https://github.com/p2-inc/phasetwo-keycloak/pull/660), not yet merged), rebased onto `dev`'s `8dee3c57` |
+| Pinned commit | `b81901ff12c0eeadc91a38b16d9b51e3b3ecadb6` |
+| Branch at pin | `dev` (merge of [PR #660](https://github.com/p2-inc/phasetwo-keycloak/pull/660)) |
 
 That PR corrects the `Region` schema, which the scanner otherwise emits as `type: string, enum:
 [...]` even though `Region` actually serializes as `{name, provider, region}` (`@JsonFormat(shape =
-OBJECT)`, invisible to the scanner). See `p2-inc/phasetwo-keycloak#659`. Once #660 merges, re-pin
-to the merge commit on `dev` instead.
+OBJECT)`, invisible to the scanner). See `p2-inc/phasetwo-keycloak#659`.
 
 Rebuilding from that commit reproduces this file byte for byte.
 
