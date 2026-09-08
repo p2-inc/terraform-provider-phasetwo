@@ -148,7 +148,12 @@ func (p *phasetwoProvider) Configure(ctx context.Context, req provider.Configure
 		return
 	}
 
-	cl, err := api.New(ctx, c)
+	// api.New bakes this context into the client-credentials token source it builds, which is
+	// then reused for every future token refresh over the life of the provider instance. The
+	// context Configure receives is only valid for this call — it is canceled once Configure
+	// returns — so using it here would cancel the first token refresh any resource or data
+	// source triggers afterwards. Use a long-lived context instead.
+	cl, err := api.New(context.Background(), c)
 	if err != nil {
 		resp.Diagnostics.AddError("Could not configure the Phase Two client", err.Error())
 		return
