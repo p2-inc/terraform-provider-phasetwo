@@ -117,7 +117,7 @@ paths:
       operationId: cluster.region.list
       responses:
         "200":
-          description: OK
+          description: Regions available for dedicated clusters.
           content:
             application/json:
               schema:
@@ -1957,9 +1957,22 @@ components:
           type: string
         region:
           description: Region the cluster is provisioned in.
-          type: string
-          allOf:
-          - $ref: "#/components/schemas/Region"
+          required:
+          - name
+          - provider
+          - region
+          type: object
+          properties:
+            name:
+              description: "Region identifier, usable as the `region` argument when\
+                \ creating a cluster."
+              type: string
+            provider:
+              description: Cloud provider hosting this region.
+              type: string
+            region:
+              description: Provider-specific region code.
+              type: string
         domain:
           description: "Custom domain recorded at provision time, when one was given.\
             \ This is not the live hostname — use `cluster.host.update` to change\
@@ -2670,6 +2683,13 @@ components:
             payment method. Such a payment method cannot be removed until the subscription
             is moved to another card.
           type: boolean
+        in_use_by:
+          description: "Names of the clusters whose active subscription is billed\
+            \ to this payment method. May be empty even when in_use_by_active_subscription\
+            \ is true, if the subscription isn't tied to a cluster."
+          type: array
+          items:
+            type: string
     PresignedUrl:
       description: "A short-lived, presigned S3 target to upload an extension jar\
         \ to."
@@ -2707,16 +2727,23 @@ components:
           description: URI Stripe returns the user to when they leave the hosted flow.
           type: string
     Region:
-      enum:
-      - LOCAL
-      - DEV
-      - US_WEST_2
-      - EU_CENTRAL_1
-      - AP_SOUTH_1
-      - AP_SOUTHEAST_1
-      - EU_WEST_1
-      - US_EAST_1
-      type: string
+      description: A region a cluster can be provisioned in.
+      required:
+      - name
+      - provider
+      - region
+      type: object
+      properties:
+        name:
+          description: "Region identifier, usable as the `region` argument when creating\
+            \ a cluster."
+          type: string
+        provider:
+          description: Cloud provider hosting this region.
+          type: string
+        region:
+          description: Provider-specific region code.
+          type: string
     ResourceLimits:
       enum:
       - standard

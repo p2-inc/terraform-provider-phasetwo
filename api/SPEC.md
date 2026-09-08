@@ -7,8 +7,8 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `0b179d6ad69fe687d79031e49d6f09f23c23c0e4` |
-| Branch at pin | `dev` (merge of PR #638) |
+| Pinned commit | `b81901ff12c0eeadc91a38b16d9b51e3b3ecadb6` |
+| Branch at pin | `dev` (merge of [PR #660](https://github.com/p2-inc/phasetwo-keycloak/pull/660)) |
 
 Rebuilding from that commit reproduces this file byte for byte.
 
