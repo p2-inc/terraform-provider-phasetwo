@@ -7,8 +7,8 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `a191fd947b5490fdbd9f6e7f18eeb64b315e2715` |
-| Branch at pin | `terraform-deployment-credentials` (PR #695) — **not merged** |
+| Pinned commit | `eee9c6eedb2020ff4e1f781c7c09c555d313e236` |
+| Branch at pin | `terraform-deployment-credentials` (PR #695, merged with `dev`) — **not merged** |
 
 Rebuilding from that commit reproduces this file byte for byte.
 
@@ -27,14 +27,6 @@ make generate                                                 # regenerate inter
 `sync-spec` runs `mvn -pl phasetwo-module -am -DskipTests process-classes` in the checkout you
 point it at, so it needs a JDK and Maven. It copies the file and prints a diff; updating the pin
 above is a deliberate edit.
-
-## Shape changes to watch on the next sync
-
-- **`Region` became an object.** It used to be a string enum; it is now `{name, provider, region}`,
-  where `name` is the identifier a cluster is created with. Picked up in this sync and handled in
-  `cluster_resource.go`, `lookup_data_sources.go` and `data_sources.go`. Worth knowing that a spec
-  sync can change a generated type out from under the provider and only show up as a compile error
-  — or, as it did here, as test fixtures that no longer match.
 
 ## Known spec limitations the client works around
 

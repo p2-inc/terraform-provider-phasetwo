@@ -32,11 +32,21 @@ info:
     Send the resulting token as `Authorization: Bearer <token>` on every call. The client secret is shown only once, when the secret is created.
 
     What a token can do is governed by the organization roles granted to its API secret, not by OAuth scopes.
-  version: 1.0.0
+  version: 2.0.0
 servers:
+- url: "https://{apiHost}.phasetwo.io/v2"
+  description: Public API host. The canonical base URL for this API.
+  variables:
+    apiHost:
+      default: api
+      description: "`api` for production, `api-staging` for staging. Must match the\
+        \ environment of the console host that issued your token."
+      enum:
+      - api
+      - api-staging
 - url: "https://{consoleHost}.phasetwo.io/auth/realms/self/v2"
-  description: "Console host. The path the API host rewrites to, and what resolves\
-    \ today."
+  description: "Console host. The path the API host rewrites to; useful for debugging,\
+    \ or for an environment where the API host is not yet served."
   variables:
     consoleHost:
       default: app
@@ -46,16 +56,6 @@ servers:
       enum:
       - app
       - app-staging
-- url: "https://{apiHost}.phasetwo.io/v2"
-  description: Public API host. Preferred once available in your environment.
-  variables:
-    apiHost:
-      default: api
-      description: "`api` for production, `api-staging` for staging. Must match the\
-        \ environment of the console host that issued your token."
-      enum:
-      - api
-      - api-staging
 security:
 - oidcClientCredentials: []
 - oidcClientCredentialsStaging: []

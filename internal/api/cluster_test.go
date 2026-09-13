@@ -12,7 +12,8 @@ import (
 
 const activeClusterJSON = `{
   "id": "c1", "name": "demo", "host": "https://demo.global.auth.ac",
-  "region": {"name": "US_EAST_1", "provider": "aws", "region": "us-east-1"}, "status": "ACTIVE", "tier": "starter",
+  "region": {"name": "US_EAST_1", "provider": "aws", "region": "us-east-1"},
+  "status": "ACTIVE", "tier": "starter",
   "resource_limits": "standard", "created_at": 1740000000000, "owner": "org1"
 }`
 
