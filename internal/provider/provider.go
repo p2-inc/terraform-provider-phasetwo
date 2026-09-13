@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -18,7 +19,10 @@ import (
 )
 
 // Ensure the implementation satisfies the framework interfaces.
-var _ provider.Provider = (*phasetwoProvider)(nil)
+var (
+	_ provider.Provider                       = (*phasetwoProvider)(nil)
+	_ provider.ProviderWithEphemeralResources = (*phasetwoProvider)(nil)
+)
 
 type phasetwoProvider struct {
 	version string
@@ -168,6 +172,14 @@ func (p *phasetwoProvider) Resources(_ context.Context) []func() resource.Resour
 		NewEnvironmentVariableResource,
 		NewExtensionResource,
 		NewExtensionVersionResource,
+		NewRealmCredentialResource,
+	}
+}
+
+// EphemeralResources returns values that are read at apply time and never written to state.
+func (p *phasetwoProvider) EphemeralResources(_ context.Context) []func() ephemeral.EphemeralResource {
+	return []func() ephemeral.EphemeralResource{
+		NewRealmCredentialSecretEphemeralResource,
 	}
 }
 

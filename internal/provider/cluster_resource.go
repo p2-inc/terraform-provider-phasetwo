@@ -371,7 +371,9 @@ func (m *clusterModel) markComputedUnset() {
 func (r *clusterResource) apply(m *clusterModel, c *client.Cluster) {
 	m.ID = types.StringValue(c.Id)
 	m.Name = types.StringValue(c.Name)
-	m.Region = types.StringValue(string(c.Region))
+	// Region became an object in the spec (name/provider/region). Name is the identifier a
+	// cluster is created with, so it is the one that round-trips through this attribute.
+	m.Region = types.StringValue(c.Region.Name)
 	m.Host = types.StringValue(c.Host)
 	m.Status = types.StringValue(string(c.Status))
 	m.Tier = types.StringValue(string(c.Tier))
