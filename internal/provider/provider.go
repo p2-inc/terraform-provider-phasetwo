@@ -165,6 +165,7 @@ func (p *phasetwoProvider) Configure(ctx context.Context, req provider.Configure
 
 	resp.DataSourceData = cl
 	resp.ResourceData = cl
+	resp.EphemeralResourceData = cl
 }
 
 func (p *phasetwoProvider) Resources(_ context.Context) []func() resource.Resource {
