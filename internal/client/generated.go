@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/oapi-codegen/runtime"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 // Defines values for BillingPeriod.
@@ -305,6 +306,15 @@ func (e Tier) Valid() bool {
 	default:
 		return false
 	}
+}
+
+// AdminBlockExtensionVersionRequest defines model for AdminBlockExtensionVersionRequest.
+type AdminBlockExtensionVersionRequest struct {
+	// Blocked True to block this version from being deployed to any cluster, false to lift an existing block.
+	Blocked bool `json:"blocked"`
+
+	// Reason Why this version is being blocked. Required when `blocked` is true; ignored otherwise.
+	Reason *string `json:"reason,omitempty"`
 }
 
 // AppLinkRequest defines model for AppLinkRequest.
@@ -652,6 +662,18 @@ type ExtensionRequest struct {
 
 // ExtensionVersion defines model for ExtensionVersion.
 type ExtensionVersion struct {
+	// AdminBlocked Whether Phase Two staff have blocked this version. A blocked version is never copied to the cluster, regardless of its `valid` flag or scan state.
+	AdminBlocked *bool `json:"admin_blocked,omitempty"`
+
+	// AdminBlockedAt When it was blocked, as epoch milliseconds; absent when not blocked.
+	AdminBlockedAt *int64 `json:"admin_blocked_at,omitempty"`
+
+	// AdminBlockedBy ID of the staff user who blocked it; absent when not blocked.
+	AdminBlockedBy *string `json:"admin_blocked_by,omitempty"`
+
+	// AdminBlockedReason Why it was blocked; absent when not blocked.
+	AdminBlockedReason *string `json:"admin_blocked_reason,omitempty"`
+
 	// CreatedAt When the version was created, as epoch milliseconds.
 	CreatedAt *int64 `json:"created_at,omitempty"`
 
@@ -996,6 +1018,21 @@ type SystemInfoRepresentation struct {
 	Version        *string `json:"version,omitempty"`
 }
 
+// TelemetryExport defines model for TelemetryExport.
+type TelemetryExport struct {
+	Enabled  *bool   `json:"enabled,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty"`
+
+	// LastDeliveryAt Example: 2022-03-10
+	LastDeliveryAt *openapi_types.Date `json:"lastDeliveryAt,omitempty"`
+	LastError      *string             `json:"lastError,omitempty"`
+	LoggerScope    *string             `json:"loggerScope,omitempty"`
+	Protocol       *string             `json:"protocol,omitempty"`
+	Signals        *[]string           `json:"signals,omitempty"`
+	Token          *string             `json:"token,omitempty"`
+	TokenSet       *bool               `json:"tokenSet,omitempty"`
+}
+
 // Tier defines model for Tier.
 type Tier string
 
@@ -1102,6 +1139,12 @@ type ClusterLogDetailParams struct {
 	Minutes *int32 `form:"minutes,omitempty" json:"minutes,omitempty"`
 }
 
+// ClusterTelemetryExportEndpointValidateParams defines parameters for ClusterTelemetryExportEndpointValidate.
+type ClusterTelemetryExportEndpointValidateParams struct {
+	// Endpoint Candidate OTLP endpoint to check.
+	Endpoint string `form:"endpoint" json:"endpoint"`
+}
+
 // ClusterCreateJSONRequestBody defines body for ClusterCreate for application/json ContentType.
 type ClusterCreateJSONRequestBody = DedicatedClusterRequest
 
@@ -1138,6 +1181,9 @@ type ClusterExtensionStandaloneConfirmJSONRequestBody = ExtensionVersionLocation
 // ClusterExtensionVersionCreateJSONRequestBody defines body for ClusterExtensionVersionCreate for application/json ContentType.
 type ClusterExtensionVersionCreateJSONRequestBody = ExtensionVersionRequest
 
+// ClusterExtensionVersionAdminBlockJSONRequestBody defines body for ClusterExtensionVersionAdminBlock for application/json ContentType.
+type ClusterExtensionVersionAdminBlockJSONRequestBody = AdminBlockExtensionVersionRequest
+
 // ClusterExtensionVersionConfirmJSONRequestBody defines body for ClusterExtensionVersionConfirm for application/json ContentType.
 type ClusterExtensionVersionConfirmJSONRequestBody = ExtensionVersionLocationValidationRequest
 
@@ -1155,6 +1201,9 @@ type ClusterHostUpdateJSONRequestBody = ClusterDomain
 
 // ClusterIpRuleUpdateJSONRequestBody defines body for ClusterIpRuleUpdate for application/json ContentType.
 type ClusterIpRuleUpdateJSONRequestBody = IpRestrictionsRequest
+
+// ClusterTelemetryExportUpdateJSONRequestBody defines body for ClusterTelemetryExportUpdate for application/json ContentType.
+type ClusterTelemetryExportUpdateJSONRequestBody = TelemetryExport
 
 // DeploymentUpdateJSONRequestBody defines body for DeploymentUpdate for application/json ContentType.
 type DeploymentUpdateJSONRequestBody = Deployment
@@ -1611,6 +1660,24 @@ type ClientInterface interface {
 	// Corresponds with DELETE /clusters/{id}/extensions/{extensionId}/versions/{versionId} (the `ClusterExtensionVersionDelete` operationId).
 	ClusterExtensionVersionDelete(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ClusterExtensionVersionAdminBlockWithBody Block or unblock an extension version.
+	//
+	// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+	ClusterExtensionVersionAdminBlockWithBody(ctx context.Context, id string, extensionId string, versionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterExtensionVersionAdminBlock Block or unblock an extension version.
+	//
+	// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+	ClusterExtensionVersionAdminBlock(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionAdminBlockJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ClusterExtensionVersionConfirmWithBody Confirm an extension version upload.
 	//
 	// Verifies the jar was uploaded to the presigned URL and records its location on the version. If extension scanning is enabled for the cluster, this also queues a security scan of the jar.
@@ -1628,6 +1695,13 @@ type ClientInterface interface {
 	//
 	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/confirm (the `ClusterExtensionVersionConfirm` operationId).
 	ClusterExtensionVersionConfirm(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionConfirmJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterExtensionVersionReport Read the security scan report for an extension version.
+	//
+	// Returns the extension checker's full report as written by the scanner: the verdict, the risk score and every individual finding. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Corresponds with GET /clusters/{id}/extensions/{extensionId}/versions/{versionId}/report (the `ClusterExtensionVersionReport` operationId).
+	ClusterExtensionVersionReport(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClusterExtensionVersionUploadUrlCreateWithBody Create an upload URL for an extension version.
 	//
@@ -1792,6 +1866,38 @@ type ClientInterface interface {
 	// Corresponds with GET /clusters/{id}/systeminfo (the `ClusterSystemInfoDetail` operationId).
 	ClusterSystemInfoDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ClusterTelemetryExportDetail Get telemetry export configuration.
+	//
+	// Returns the cluster's telemetry export configuration. The bearer token is never returned; tokenSet indicates whether one is stored.
+	//
+	// Corresponds with GET /clusters/{id}/telemetry-export (the `ClusterTelemetryExportDetail` operationId).
+	ClusterTelemetryExportDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterTelemetryExportUpdateWithBody Update telemetry export configuration.
+	//
+	// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+	ClusterTelemetryExportUpdateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterTelemetryExportUpdate Update telemetry export configuration.
+	//
+	// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+	ClusterTelemetryExportUpdate(ctx context.Context, id string, body ClusterTelemetryExportUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterTelemetryExportEndpointValidate Validate a telemetry export endpoint.
+	//
+	// Checks an endpoint without saving, so the caller can offer feedback before committing. Changes nothing. Resolution happens again at publish time, since validating once is defeated by DNS rebinding.
+	//
+	// Corresponds with GET /clusters/{id}/telemetry-export/validate-endpoint (the `ClusterTelemetryExportEndpointValidate` operationId).
+	ClusterTelemetryExportEndpointValidate(ctx context.Context, id string, params *ClusterTelemetryExportEndpointValidateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeploymentDelete Remove a deployment by ID.
 	//
 	// Permanently deletes a deployment (realm). Only the owner may delete it.
@@ -1858,7 +1964,7 @@ type ClientInterface interface {
 
 	// DeploymentCredentialCreateWithBody Create an admin credential for a deployment.
 	//
-	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -1867,7 +1973,7 @@ type ClientInterface interface {
 
 	// DeploymentCredentialCreate Create an admin credential for a deployment.
 	//
-	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -2851,6 +2957,44 @@ func (c *Client) ClusterExtensionVersionDelete(ctx context.Context, id string, e
 	return c.Client.Do(req)
 }
 
+// ClusterExtensionVersionAdminBlockWithBody Block or unblock an extension version.
+//
+// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+func (c *Client) ClusterExtensionVersionAdminBlockWithBody(ctx context.Context, id string, extensionId string, versionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterExtensionVersionAdminBlockRequestWithBody(c.Server, id, extensionId, versionId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterExtensionVersionAdminBlock Block or unblock an extension version.
+//
+// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+func (c *Client) ClusterExtensionVersionAdminBlock(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionAdminBlockJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterExtensionVersionAdminBlockRequest(c.Server, id, extensionId, versionId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // ClusterExtensionVersionConfirmWithBody Confirm an extension version upload.
 //
 // Verifies the jar was uploaded to the presigned URL and records its location on the version. If extension scanning is enabled for the cluster, this also queues a security scan of the jar.
@@ -2879,6 +3023,23 @@ func (c *Client) ClusterExtensionVersionConfirmWithBody(ctx context.Context, id 
 // Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/confirm (the `ClusterExtensionVersionConfirm` operationId).
 func (c *Client) ClusterExtensionVersionConfirm(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionConfirmJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewClusterExtensionVersionConfirmRequest(c.Server, id, extensionId, versionId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterExtensionVersionReport Read the security scan report for an extension version.
+//
+// Returns the extension checker's full report as written by the scanner: the verdict, the risk score and every individual finding. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Corresponds with GET /clusters/{id}/extensions/{extensionId}/versions/{versionId}/report (the `ClusterExtensionVersionReport` operationId).
+func (c *Client) ClusterExtensionVersionReport(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterExtensionVersionReportRequest(c.Server, id, extensionId, versionId)
 	if err != nil {
 		return nil, err
 	}
@@ -3262,6 +3423,78 @@ func (c *Client) ClusterSystemInfoDetail(ctx context.Context, id string, reqEdit
 	return c.Client.Do(req)
 }
 
+// ClusterTelemetryExportDetail Get telemetry export configuration.
+//
+// Returns the cluster's telemetry export configuration. The bearer token is never returned; tokenSet indicates whether one is stored.
+//
+// Corresponds with GET /clusters/{id}/telemetry-export (the `ClusterTelemetryExportDetail` operationId).
+func (c *Client) ClusterTelemetryExportDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterTelemetryExportDetailRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterTelemetryExportUpdateWithBody Update telemetry export configuration.
+//
+// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+func (c *Client) ClusterTelemetryExportUpdateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterTelemetryExportUpdateRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterTelemetryExportUpdate Update telemetry export configuration.
+//
+// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+func (c *Client) ClusterTelemetryExportUpdate(ctx context.Context, id string, body ClusterTelemetryExportUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterTelemetryExportUpdateRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterTelemetryExportEndpointValidate Validate a telemetry export endpoint.
+//
+// Checks an endpoint without saving, so the caller can offer feedback before committing. Changes nothing. Resolution happens again at publish time, since validating once is defeated by DNS rebinding.
+//
+// Corresponds with GET /clusters/{id}/telemetry-export/validate-endpoint (the `ClusterTelemetryExportEndpointValidate` operationId).
+func (c *Client) ClusterTelemetryExportEndpointValidate(ctx context.Context, id string, params *ClusterTelemetryExportEndpointValidateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterTelemetryExportEndpointValidateRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // DeploymentDelete Remove a deployment by ID.
 //
 // Permanently deletes a deployment (realm). Only the owner may delete it.
@@ -3408,7 +3641,7 @@ func (c *Client) DeploymentCredentialList(ctx context.Context, id string, reqEdi
 
 // DeploymentCredentialCreateWithBody Create an admin credential for a deployment.
 //
-// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 //
 // Takes any type of body and a specified content type.
 //
@@ -3427,7 +3660,7 @@ func (c *Client) DeploymentCredentialCreateWithBody(ctx context.Context, id stri
 
 // DeploymentCredentialCreate Create an admin credential for a deployment.
 //
-// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -5299,6 +5532,67 @@ func NewClusterExtensionVersionDeleteRequest(server string, id string, extension
 	return req, nil
 }
 
+// NewClusterExtensionVersionAdminBlockRequest calls the generic ClusterExtensionVersionAdminBlock builder with application/json body
+func NewClusterExtensionVersionAdminBlockRequest(server string, id string, extensionId string, versionId string, body ClusterExtensionVersionAdminBlockJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterExtensionVersionAdminBlockRequestWithBody(server, id, extensionId, versionId, "application/json", bodyReader)
+}
+
+// NewClusterExtensionVersionAdminBlockRequestWithBody constructs an http.Request for the ClusterExtensionVersionAdminBlock method, with any body, and a specified content type
+func NewClusterExtensionVersionAdminBlockRequestWithBody(server string, id string, extensionId string, versionId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "extensionId", extensionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithOptions("simple", false, "versionId", versionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/extensions/%s/versions/%s/admin-block", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewClusterExtensionVersionConfirmRequest calls the generic ClusterExtensionVersionConfirm builder with application/json body
 func NewClusterExtensionVersionConfirmRequest(server string, id string, extensionId string, versionId string, body ClusterExtensionVersionConfirmJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -5356,6 +5650,54 @@ func NewClusterExtensionVersionConfirmRequestWithBody(server string, id string, 
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewClusterExtensionVersionReportRequest constructs an http.Request for the ClusterExtensionVersionReport method
+func NewClusterExtensionVersionReportRequest(server string, id string, extensionId string, versionId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "extensionId", extensionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithOptions("simple", false, "versionId", versionId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/extensions/%s/versions/%s/report", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -6147,6 +6489,144 @@ func NewClusterSystemInfoDetailRequest(server string, id string) (*http.Request,
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewClusterTelemetryExportDetailRequest constructs an http.Request for the ClusterTelemetryExportDetail method
+func NewClusterTelemetryExportDetailRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/telemetry-export", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewClusterTelemetryExportUpdateRequest calls the generic ClusterTelemetryExportUpdate builder with application/json body
+func NewClusterTelemetryExportUpdateRequest(server string, id string, body ClusterTelemetryExportUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterTelemetryExportUpdateRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewClusterTelemetryExportUpdateRequestWithBody constructs an http.Request for the ClusterTelemetryExportUpdate method, with any body, and a specified content type
+func NewClusterTelemetryExportUpdateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/telemetry-export", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewClusterTelemetryExportEndpointValidateRequest constructs an http.Request for the ClusterTelemetryExportEndpointValidate method
+func NewClusterTelemetryExportEndpointValidateRequest(server string, id string, params *ClusterTelemetryExportEndpointValidateParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/telemetry-export/validate-endpoint", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if queryFrag, err := runtime.StyleParamWithOptions("form", true, "endpoint", params.Endpoint, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+			return nil, err
+		} else {
+			for _, qp := range strings.Split(queryFrag, "&") {
+				rawQueryFragments = append(rawQueryFragments, qp)
+			}
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
@@ -7619,6 +8099,24 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with DELETE /clusters/{id}/extensions/{extensionId}/versions/{versionId} (the `ClusterExtensionVersionDelete` operationId).
 	ClusterExtensionVersionDeleteWithResponse(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionDeleteResponse, error)
 
+	// ClusterExtensionVersionAdminBlockWithBodyWithResponse Block or unblock an extension version.
+	//
+	// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+	ClusterExtensionVersionAdminBlockWithBodyWithResponse(ctx context.Context, id string, extensionId string, versionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionAdminBlockResponse, error)
+
+	// ClusterExtensionVersionAdminBlockWithResponse Block or unblock an extension version.
+	//
+	// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+	ClusterExtensionVersionAdminBlockWithResponse(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionAdminBlockJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionAdminBlockResponse, error)
+
 	// ClusterExtensionVersionConfirmWithBodyWithResponse Confirm an extension version upload.
 	//
 	// Verifies the jar was uploaded to the presigned URL and records its location on the version. If extension scanning is enabled for the cluster, this also queues a security scan of the jar.
@@ -7636,6 +8134,15 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/confirm (the `ClusterExtensionVersionConfirm` operationId).
 	ClusterExtensionVersionConfirmWithResponse(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionConfirmJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionConfirmResponse, error)
+
+	// ClusterExtensionVersionReportWithResponse Read the security scan report for an extension version.
+	//
+	// Returns the extension checker's full report as written by the scanner: the verdict, the risk score and every individual finding. Requires the `manage-clusters` role on the `cluster-management` client.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /clusters/{id}/extensions/{extensionId}/versions/{versionId}/report (the `ClusterExtensionVersionReport` operationId).
+	ClusterExtensionVersionReportWithResponse(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionReportResponse, error)
 
 	// ClusterExtensionVersionUploadUrlCreateWithBodyWithResponse Create an upload URL for an extension version.
 	//
@@ -7822,6 +8329,42 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /clusters/{id}/systeminfo (the `ClusterSystemInfoDetail` operationId).
 	ClusterSystemInfoDetailWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ClusterSystemInfoDetailResponse, error)
 
+	// ClusterTelemetryExportDetailWithResponse Get telemetry export configuration.
+	//
+	// Returns the cluster's telemetry export configuration. The bearer token is never returned; tokenSet indicates whether one is stored.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /clusters/{id}/telemetry-export (the `ClusterTelemetryExportDetail` operationId).
+	ClusterTelemetryExportDetailWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportDetailResponse, error)
+
+	// ClusterTelemetryExportUpdateWithBodyWithResponse Update telemetry export configuration.
+	//
+	// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+	ClusterTelemetryExportUpdateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportUpdateResponse, error)
+
+	// ClusterTelemetryExportUpdateWithResponse Update telemetry export configuration.
+	//
+	// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+	ClusterTelemetryExportUpdateWithResponse(ctx context.Context, id string, body ClusterTelemetryExportUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportUpdateResponse, error)
+
+	// ClusterTelemetryExportEndpointValidateWithResponse Validate a telemetry export endpoint.
+	//
+	// Checks an endpoint without saving, so the caller can offer feedback before committing. Changes nothing. Resolution happens again at publish time, since validating once is defeated by DNS rebinding.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /clusters/{id}/telemetry-export/validate-endpoint (the `ClusterTelemetryExportEndpointValidate` operationId).
+	ClusterTelemetryExportEndpointValidateWithResponse(ctx context.Context, id string, params *ClusterTelemetryExportEndpointValidateParams, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportEndpointValidateResponse, error)
+
 	// DeploymentDeleteWithResponse Remove a deployment by ID.
 	//
 	// Permanently deletes a deployment (realm). Only the owner may delete it.
@@ -7896,7 +8439,7 @@ type ClientWithResponsesInterface interface {
 
 	// DeploymentCredentialCreateWithBodyWithResponse Create an admin credential for a deployment.
 	//
-	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -7905,7 +8448,7 @@ type ClientWithResponsesInterface interface {
 
 	// DeploymentCredentialCreateWithResponse Create an admin credential for a deployment.
 	//
-	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -9461,6 +10004,47 @@ func (r ClusterExtensionVersionDeleteResponse) ContentType() string {
 	return ""
 }
 
+type ClusterExtensionVersionAdminBlockResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ExtensionVersion
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ClusterExtensionVersionAdminBlockResponse) GetJSON200() *ExtensionVersion {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterExtensionVersionAdminBlockResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterExtensionVersionAdminBlockResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterExtensionVersionAdminBlockResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterExtensionVersionAdminBlockResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type ClusterExtensionVersionConfirmResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9496,6 +10080,40 @@ func (r ClusterExtensionVersionConfirmResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r ClusterExtensionVersionConfirmResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterExtensionVersionReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterExtensionVersionReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterExtensionVersionReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterExtensionVersionReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterExtensionVersionReportResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -10152,6 +10770,108 @@ func (r ClusterSystemInfoDetailResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r ClusterSystemInfoDetailResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterTelemetryExportDetailResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterTelemetryExportDetailResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterTelemetryExportDetailResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterTelemetryExportDetailResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterTelemetryExportDetailResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterTelemetryExportUpdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterTelemetryExportUpdateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterTelemetryExportUpdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterTelemetryExportUpdateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterTelemetryExportUpdateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterTelemetryExportEndpointValidateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterTelemetryExportEndpointValidateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterTelemetryExportEndpointValidateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterTelemetryExportEndpointValidateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterTelemetryExportEndpointValidateResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -11845,6 +12565,36 @@ func (c *ClientWithResponses) ClusterExtensionVersionDeleteWithResponse(ctx cont
 	return ParseClusterExtensionVersionDeleteResponse(rsp)
 }
 
+// ClusterExtensionVersionAdminBlockWithBodyWithResponse Block or unblock an extension version.
+//
+// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+func (c *ClientWithResponses) ClusterExtensionVersionAdminBlockWithBodyWithResponse(ctx context.Context, id string, extensionId string, versionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionAdminBlockResponse, error) {
+	rsp, err := c.ClusterExtensionVersionAdminBlockWithBody(ctx, id, extensionId, versionId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterExtensionVersionAdminBlockResponse(rsp)
+}
+
+// ClusterExtensionVersionAdminBlockWithResponse Block or unblock an extension version.
+//
+// Stops an extension version being deployed to any cluster, or lifts an existing block. A blocked version is never copied during a cluster reconcile, whatever its `valid` flag or scan state says. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/extensions/{extensionId}/versions/{versionId}/admin-block (the `ClusterExtensionVersionAdminBlock` operationId).
+func (c *ClientWithResponses) ClusterExtensionVersionAdminBlockWithResponse(ctx context.Context, id string, extensionId string, versionId string, body ClusterExtensionVersionAdminBlockJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionAdminBlockResponse, error) {
+	rsp, err := c.ClusterExtensionVersionAdminBlock(ctx, id, extensionId, versionId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterExtensionVersionAdminBlockResponse(rsp)
+}
+
 // ClusterExtensionVersionConfirmWithBodyWithResponse Confirm an extension version upload.
 //
 // Verifies the jar was uploaded to the presigned URL and records its location on the version. If extension scanning is enabled for the cluster, this also queues a security scan of the jar.
@@ -11873,6 +12623,21 @@ func (c *ClientWithResponses) ClusterExtensionVersionConfirmWithResponse(ctx con
 		return nil, err
 	}
 	return ParseClusterExtensionVersionConfirmResponse(rsp)
+}
+
+// ClusterExtensionVersionReportWithResponse Read the security scan report for an extension version.
+//
+// Returns the extension checker's full report as written by the scanner: the verdict, the risk score and every individual finding. Requires the `manage-clusters` role on the `cluster-management` client.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /clusters/{id}/extensions/{extensionId}/versions/{versionId}/report (the `ClusterExtensionVersionReport` operationId).
+func (c *ClientWithResponses) ClusterExtensionVersionReportWithResponse(ctx context.Context, id string, extensionId string, versionId string, reqEditors ...RequestEditorFn) (*ClusterExtensionVersionReportResponse, error) {
+	rsp, err := c.ClusterExtensionVersionReport(ctx, id, extensionId, versionId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterExtensionVersionReportResponse(rsp)
 }
 
 // ClusterExtensionVersionUploadUrlCreateWithBodyWithResponse Create an upload URL for an extension version.
@@ -12186,6 +12951,66 @@ func (c *ClientWithResponses) ClusterSystemInfoDetailWithResponse(ctx context.Co
 	return ParseClusterSystemInfoDetailResponse(rsp)
 }
 
+// ClusterTelemetryExportDetailWithResponse Get telemetry export configuration.
+//
+// Returns the cluster's telemetry export configuration. The bearer token is never returned; tokenSet indicates whether one is stored.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /clusters/{id}/telemetry-export (the `ClusterTelemetryExportDetail` operationId).
+func (c *ClientWithResponses) ClusterTelemetryExportDetailWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportDetailResponse, error) {
+	rsp, err := c.ClusterTelemetryExportDetail(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterTelemetryExportDetailResponse(rsp)
+}
+
+// ClusterTelemetryExportUpdateWithBodyWithResponse Update telemetry export configuration.
+//
+// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+func (c *ClientWithResponses) ClusterTelemetryExportUpdateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportUpdateResponse, error) {
+	rsp, err := c.ClusterTelemetryExportUpdateWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterTelemetryExportUpdateResponse(rsp)
+}
+
+// ClusterTelemetryExportUpdateWithResponse Update telemetry export configuration.
+//
+// Stores the configuration and publishes or withdraws the cluster's gateway config. Omit token to leave the stored one unchanged. Rejects settings the pipeline cannot honour rather than silently ignoring them.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/telemetry-export (the `ClusterTelemetryExportUpdate` operationId).
+func (c *ClientWithResponses) ClusterTelemetryExportUpdateWithResponse(ctx context.Context, id string, body ClusterTelemetryExportUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportUpdateResponse, error) {
+	rsp, err := c.ClusterTelemetryExportUpdate(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterTelemetryExportUpdateResponse(rsp)
+}
+
+// ClusterTelemetryExportEndpointValidateWithResponse Validate a telemetry export endpoint.
+//
+// Checks an endpoint without saving, so the caller can offer feedback before committing. Changes nothing. Resolution happens again at publish time, since validating once is defeated by DNS rebinding.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /clusters/{id}/telemetry-export/validate-endpoint (the `ClusterTelemetryExportEndpointValidate` operationId).
+func (c *ClientWithResponses) ClusterTelemetryExportEndpointValidateWithResponse(ctx context.Context, id string, params *ClusterTelemetryExportEndpointValidateParams, reqEditors ...RequestEditorFn) (*ClusterTelemetryExportEndpointValidateResponse, error) {
+	rsp, err := c.ClusterTelemetryExportEndpointValidate(ctx, id, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterTelemetryExportEndpointValidateResponse(rsp)
+}
+
 // DeploymentDeleteWithResponse Remove a deployment by ID.
 //
 // Permanently deletes a deployment (realm). Only the owner may delete it.
@@ -12308,7 +13133,7 @@ func (c *ClientWithResponses) DeploymentCredentialListWithResponse(ctx context.C
 
 // DeploymentCredentialCreateWithBodyWithResponse Create an admin credential for a deployment.
 //
-// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12323,7 +13148,7 @@ func (c *ClientWithResponses) DeploymentCredentialCreateWithBodyWithResponse(ctx
 
 // DeploymentCredentialCreateWithResponse Create an admin credential for a deployment.
 //
-// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The secret is included in this response, and can be read again later with `deployment.credential.secret.read`. See the read-back details on that method. Create a separate credential per holder so they can be revoked independently.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -13497,6 +14322,32 @@ func ParseClusterExtensionVersionDeleteResponse(rsp *http.Response) (*ClusterExt
 	return response, nil
 }
 
+// ParseClusterExtensionVersionAdminBlockResponse parses an HTTP response from a ClusterExtensionVersionAdminBlockWithResponse call
+func ParseClusterExtensionVersionAdminBlockResponse(rsp *http.Response) (*ClusterExtensionVersionAdminBlockResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterExtensionVersionAdminBlockResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExtensionVersion
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseClusterExtensionVersionConfirmResponse parses an HTTP response from a ClusterExtensionVersionConfirmWithResponse call
 func ParseClusterExtensionVersionConfirmResponse(rsp *http.Response) (*ClusterExtensionVersionConfirmResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -13518,6 +14369,22 @@ func ParseClusterExtensionVersionConfirmResponse(rsp *http.Response) (*ClusterEx
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseClusterExtensionVersionReportResponse parses an HTTP response from a ClusterExtensionVersionReportWithResponse call
+func ParseClusterExtensionVersionReportResponse(rsp *http.Response) (*ClusterExtensionVersionReportResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterExtensionVersionReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
 	}
 
 	return response, nil
@@ -13934,6 +14801,54 @@ func ParseClusterSystemInfoDetailResponse(rsp *http.Response) (*ClusterSystemInf
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseClusterTelemetryExportDetailResponse parses an HTTP response from a ClusterTelemetryExportDetailWithResponse call
+func ParseClusterTelemetryExportDetailResponse(rsp *http.Response) (*ClusterTelemetryExportDetailResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterTelemetryExportDetailResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseClusterTelemetryExportUpdateResponse parses an HTTP response from a ClusterTelemetryExportUpdateWithResponse call
+func ParseClusterTelemetryExportUpdateResponse(rsp *http.Response) (*ClusterTelemetryExportUpdateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterTelemetryExportUpdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseClusterTelemetryExportEndpointValidateResponse parses an HTTP response from a ClusterTelemetryExportEndpointValidateWithResponse call
+func ParseClusterTelemetryExportEndpointValidateResponse(rsp *http.Response) (*ClusterTelemetryExportEndpointValidateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterTelemetryExportEndpointValidateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
 	}
 
 	return response, nil
