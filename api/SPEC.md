@@ -7,10 +7,15 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `b81901ff12c0eeadc91a38b16d9b51e3b3ecadb6` |
-| Branch at pin | `dev` (merge of [PR #660](https://github.com/p2-inc/phasetwo-keycloak/pull/660)) |
+| Pinned commit | `eee9c6eedb2020ff4e1f781c7c09c555d313e236` |
+| Branch at pin | `terraform-deployment-credentials` (PR #695, merged with `dev`) — **not merged** |
 
 Rebuilding from that commit reproduces this file byte for byte.
+
+> **This pin is temporary and must not be released.** It points at a PR branch rather than a merged
+> commit, which is the thing commit `8ce5495` went back and fixed once already. It is here because
+> `deployment.credential.*` does not exist on `dev` yet. Re-run `make sync-spec` against `dev` and
+> update this table once p2-inc/phasetwo-keycloak#695 merges, before this provider ships.
 
 ## Refreshing
 

@@ -5,23 +5,60 @@ info:
   description: |-
     Automate management of your Phase Two hosted Keycloak clusters: dedicated clusters, deployments (realms), custom domains, extensions, environment variables, IP rules, organizations, and billing.
 
+    This is the **control plane** API. It manages clusters themselves -- creating them, adding realms, attaching domains -- and is entirely separate from the Keycloak Admin REST API you use to configure what lives *inside* a realm.
+
+    ## Hosts
+
+    Two hostnames are involved, and both differ by environment: tokens are minted by the control-plane realm on the **console host**, while the operations in this reference are served from the **API host**.
+
+    | Environment | Console host (tokens) | API host (operations) |
+    |---|---|---|
+    | Production *(default)* | `app.phasetwo.io` | `api.phasetwo.io` |
+    | Staging | `app-staging.phasetwo.io` | `api-staging.phasetwo.io` |
+
+    Everything below defaults to production. To work against staging, pick `api-staging` (or `app-staging`) in the server selector **and** select the `oidcClientCredentialsStaging` security scheme -- the token endpoint is a separate field that the server selector cannot retarget. The two must match: a token minted in one environment is not valid in the other.
+
     ## Authentication
 
-    All requests require an OAuth2 access token obtained via the **client credentials grant** against your Phase Two organization's OIDC token endpoint (`https://<your-console-host>/realms/self/protocol/openid-connect/token`, where `<your-console-host>` is the same host you use to log into the Phase Two console). Create a client (an "API secret") for your organization via the `org.apiSecret.create` operation below, then request a token with that client's ID and secret using `grant_type=client_credentials`. Send the resulting token as `Authorization: Bearer <token>` on every call.
-  version: 1.0.0
+    Every request needs an OAuth2 access token obtained via the **client credentials grant**. Create an API secret for your organization -- in the console under your team's **API Credentials** tab, or via `org.apiSecret.create` -- then exchange its client ID and secret for a token:
+
+    ```
+    curl -X POST https://app.phasetwo.io/auth/realms/self/protocol/openid-connect/token \
+      -d grant_type=client_credentials \
+      -d client_id=$PHASETWO_CLIENT_ID \
+      -d client_secret=$PHASETWO_CLIENT_SECRET
+    ```
+
+    Send the resulting token as `Authorization: Bearer <token>` on every call. The client secret is shown only once, when the secret is created.
+
+    What a token can do is governed by the organization roles granted to its API secret, not by OAuth scopes.
+  version: 2.0.0
 servers:
-- url: "https://{environment}.phasetwo.io/auth/realms/self/v2"
-  description: Phase Two hosted console API.
+- url: "https://{apiHost}.phasetwo.io/v2"
+  description: Public API host. The canonical base URL for this API.
   variables:
-    environment:
+    apiHost:
+      default: api
+      description: "`api` for production, `api-staging` for staging. Must match the\
+        \ environment of the console host that issued your token."
+      enum:
+      - api
+      - api-staging
+- url: "https://{consoleHost}.phasetwo.io/auth/realms/self/v2"
+  description: "Console host. The path the API host rewrites to; useful for debugging,\
+    \ or for an environment where the API host is not yet served."
+  variables:
+    consoleHost:
       default: app
       description: "`app` for production, `app-staging` for staging. This is the same\
-        \ host you use to log into the Phase Two console."
+        \ host you use to log into the Phase Two console, and the host that mints\
+        \ your access token."
       enum:
       - app
       - app-staging
 security:
 - oidcClientCredentials: []
+- oidcClientCredentialsStaging: []
 tags:
 - name: orgs
   description: Organizations and their API secrets.
@@ -46,7 +83,7 @@ paths:
   /clusters:
     get:
       tags:
-      - Clusters
+      - clusters
       summary: List your dedicated clusters.
       description: Returns the dedicated clusters belonging to organizations the authenticated
         API client has access to. Archived clusters are excluded.
@@ -62,7 +99,7 @@ paths:
                   $ref: "#/components/schemas/Cluster"
     post:
       tags:
-      - Clusters
+      - clusters
       summary: Create a dedicated cluster.
       description: |-
         Starts creation of a dedicated cluster for an organization. Provisioning begins once payment is settled, and the response tells you what is needed to get there — exactly one of three shapes:
@@ -88,7 +125,7 @@ paths:
   /clusters/name-available:
     get:
       tags:
-      - Clusters
+      - clusters
       summary: Check whether a cluster name is available.
       description: "Validates a candidate name for a new dedicated cluster and reports\
         \ whether it is available (well-formed, not reserved, and not already in use)."
@@ -110,7 +147,7 @@ paths:
   /clusters/regions:
     get:
       tags:
-      - Clusters
+      - clusters
       summary: List regions available for dedicated clusters.
       description: Returns the AWS regions a new dedicated cluster can be provisioned
         into.
@@ -193,8 +230,9 @@ paths:
     post:
       tags:
       - clusters
-      summary: Resume Stripe checkout for a cluster whose billing setup was not completed.
-        Returns a link to complete payment setup within a browser.
+      summary: "Restore billing for a cluster that is not currently paid for. Returns\
+        \ a browser link: the existing subscription's open invoice when paying it\
+        \ repairs the subscription, otherwise a fresh Stripe checkout for a new subscription."
       operationId: cluster.checkout.resume
       requestBody:
         description: Optional price/billing-period override for the resumed checkout.
@@ -1474,6 +1512,119 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConsoleLink"
+  /deployments/{id}/credentials:
+    get:
+      tags:
+      - deployments
+      summary: List admin credentials for a deployment.
+      description: "Lists the credentials created for this deployment, with the `realm-management`\
+        \ roles each one currently holds. Secrets are not included; read one back\
+        \ individually with `deployment.credential.secret.read`."
+      operationId: deployment.credential.list
+      parameters:
+      - name: id
+        in: path
+        description: ID of the deployment.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Credentials for the deployment.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeploymentCredential"
+    post:
+      tags:
+      - deployments
+      summary: Create an admin credential for a deployment.
+      description: "Creates a service account client on the deployment's realm for\
+        \ administering that realm directly -- with the Keycloak Terraform provider,\
+        \ a provisioning script, an audit integration, or anything else that speaks\
+        \ Keycloak's admin API. Grants the `realm-management` roles given in `roles`,\
+        \ defaulting to `realm-admin`. The response is the only time the client secret\
+        \ is available; it is not stored and cannot be retrieved again. Create a separate\
+        \ credential per holder so they can be revoked independently."
+      operationId: deployment.credential.create
+      parameters:
+      - name: id
+        in: path
+        description: ID of the deployment.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: "Name, note and roles for the new credential. All optional."
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeploymentCredentialRequest"
+      responses:
+        "200":
+          description: "The new credential, including its one-time secret."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeploymentCredential"
+  /deployments/{id}/credentials/{clientId}:
+    delete:
+      tags:
+      - deployments
+      summary: Revoke an admin credential for a deployment.
+      description: "Deletes the client from the deployment's realm, immediately invalidating\
+        \ the credential. Only credentials created through this API can be revoked\
+        \ here."
+      operationId: deployment.credential.delete
+      parameters:
+      - name: clientId
+        in: path
+        description: Client ID of the credential to revoke.
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: ID of the deployment.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Credential revoked.
+  /deployments/{id}/credentials/{clientId}/secret:
+    get:
+      tags:
+      - deployments
+      summary: Read an admin credential's secret.
+      description: "Returns the credential including its client secret, read from\
+        \ the deployment's realm. Phase Two keeps no copy; this asks the realm, which\
+        \ is where the secret lives. Reading does not rotate it, so a tool can fetch\
+        \ it on each run instead of persisting it -- which for Terraform means keeping\
+        \ it out of `terraform.tfstate`."
+      operationId: deployment.credential.secret.read
+      parameters:
+      - name: clientId
+        in: path
+        description: Client ID of the credential to read.
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        description: ID of the deployment.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "The credential, including its secret."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeploymentCredential"
   /deployments/{id}/metrics:
     get:
       tags:
@@ -2237,6 +2388,68 @@ components:
         stateError:
           description: "Why the deployment last failed, when it is in a failed state."
           type: string
+    DeploymentCredential:
+      required:
+      - client_id
+      - roles
+      - server_url
+      - realm
+      type: object
+      properties:
+        client_id:
+          description: Client ID to authenticate with.
+          type: string
+        client_secret:
+          description: "Client secret to authenticate with. Returned on create and\
+            \ by `deployment.credential.secret.read`, which reads it from the realm\
+            \ rather than from us -- Phase Two keeps no copy. Reading does not rotate\
+            \ it, so prefer fetching it when needed over storing it."
+          type: string
+        name:
+          description: "Name this credential was created with, echoed back from the\
+            \ client ID."
+          type: string
+        description:
+          description: "Free-text note recorded on the client, to tell credentials\
+            \ apart."
+          type: string
+        roles:
+          description: "`realm-management` roles granted to this credential. On create\
+            \ this is what was actually granted, which is worth checking against what\
+            \ you asked for."
+          type: array
+          items:
+            type: string
+        server_url:
+          description: Base URL of the deployment's Keycloak instance.
+          type: string
+        realm:
+          description: Realm this credential administers.
+          type: string
+    DeploymentCredentialRequest:
+      type: object
+      properties:
+        name:
+          description: "Short name for this credential, included in the generated\
+            \ client ID so it is recognisable in the realm's client list, e.g. `terraform`\
+            \ produces `api-terraform-9f3c1a2b`. Lower-case letters, digits and hyphens,\
+            \ up to 48 characters. Optional."
+          type: string
+        description:
+          description: "Free-text note recorded on the client so credentials can be\
+            \ told apart later, e.g. which pipeline or workstation holds it. Optional,\
+            \ but revoking the right one later is much easier with it."
+          type: string
+        roles:
+          description: "`realm-management` client roles to grant, e.g. `[\"view-users\"\
+            , \"view-realm\"]`. Defaults to `[\"realm-admin\"]`, which is full administrative\
+            \ access to the realm and what the Keycloak Terraform provider generally\
+            \ needs. Narrow this where you can: a credential that only reads should\
+            \ only be able to read. Roles that do not exist are rejected rather than\
+            \ quietly skipped."
+          type: array
+          items:
+            type: string
     DeploymentState:
       description: Lifecycle state of a deployment (realm).
       enum:
@@ -2867,6 +3080,16 @@ components:
         description:
           description: Description of the subscribed plan.
           type: string
+        open_invoice:
+          description: "True when the subscription is delinquent but repairable: it\
+            \ has an open invoice whose payment restores service, so billing can be\
+            \ fixed without starting a new subscription. Absent otherwise."
+          type: boolean
+        open_invoice_amount_due:
+          format: int64
+          description: "Amount remaining on the open invoice, in the smallest currency\
+            \ unit (e.g. cents). Present only when `open_invoice` is true."
+          type: integer
     SystemInfoRepresentation:
       type: object
       properties:
@@ -2986,9 +3209,21 @@ components:
   securitySchemes:
     oidcClientCredentials:
       type: oauth2
-      description: "OIDC client credentials grant. Obtain a client ID/secret pair\
-        \ via the `org.apiSecret.create` operation, then exchange them for an access\
-        \ token at your realm's `/protocol/openid-connect/token` endpoint."
+      description: "OIDC client credentials grant against **production**. Obtain a\
+        \ client ID/secret pair via the `org.apiSecret.create` operation, then exchange\
+        \ them for an access token at `https://app.phasetwo.io/auth/realms/self/protocol/openid-connect/token`.\
+        \ Use the scheme whose environment matches the server you selected."
       flows:
         clientCredentials:
-          tokenUrl: https://<your-console-host>/realms/self/protocol/openid-connect/token
+          tokenUrl: https://app.phasetwo.io/auth/realms/self/protocol/openid-connect/token
+          scopes: {}
+    oidcClientCredentialsStaging:
+      type: oauth2
+      description: "OIDC client credentials grant against **staging**. Obtain a client\
+        \ ID/secret pair via the `org.apiSecret.create` operation, then exchange them\
+        \ for an access token at `https://app-staging.phasetwo.io/auth/realms/self/protocol/openid-connect/token`.\
+        \ Use the scheme whose environment matches the server you selected."
+      flows:
+        clientCredentials:
+          tokenUrl: https://app-staging.phasetwo.io/auth/realms/self/protocol/openid-connect/token
+          scopes: {}

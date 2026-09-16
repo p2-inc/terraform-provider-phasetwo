@@ -527,6 +527,42 @@ type Deployment struct {
 	Tags *[]string `json:"tags,omitempty"`
 }
 
+// DeploymentCredential defines model for DeploymentCredential.
+type DeploymentCredential struct {
+	// ClientId Client ID to authenticate with.
+	ClientId string `json:"client_id"`
+
+	// ClientSecret Client secret to authenticate with. Returned on create and by `deployment.credential.secret.read`, which reads it from the realm rather than from us -- Phase Two keeps no copy. Reading does not rotate it, so prefer fetching it when needed over storing it.
+	ClientSecret *string `json:"client_secret,omitempty"`
+
+	// Description Free-text note recorded on the client, to tell credentials apart.
+	Description *string `json:"description,omitempty"`
+
+	// Name Name this credential was created with, echoed back from the client ID.
+	Name *string `json:"name,omitempty"`
+
+	// Realm Realm this credential administers.
+	Realm string `json:"realm"`
+
+	// Roles `realm-management` roles granted to this credential. On create this is what was actually granted, which is worth checking against what you asked for.
+	Roles []string `json:"roles"`
+
+	// ServerUrl Base URL of the deployment's Keycloak instance.
+	ServerUrl string `json:"server_url"`
+}
+
+// DeploymentCredentialRequest defines model for DeploymentCredentialRequest.
+type DeploymentCredentialRequest struct {
+	// Description Free-text note recorded on the client so credentials can be told apart later, e.g. which pipeline or workstation holds it. Optional, but revoking the right one later is much easier with it.
+	Description *string `json:"description,omitempty"`
+
+	// Name Short name for this credential, included in the generated client ID so it is recognisable in the realm's client list, e.g. `terraform` produces `api-terraform-9f3c1a2b`. Lower-case letters, digits and hyphens, up to 48 characters. Optional.
+	Name *string `json:"name,omitempty"`
+
+	// Roles `realm-management` client roles to grant, e.g. `["view-users", "view-realm"]`. Defaults to `["realm-admin"]`, which is full administrative access to the realm and what the Keycloak Terraform provider generally needs. Narrow this where you can: a credential that only reads should only be able to read. Roles that do not exist are rejected rather than quietly skipped.
+	Roles *[]string `json:"roles,omitempty"`
+}
+
 // DeploymentState Lifecycle state of a deployment (realm).
 type DeploymentState string
 
@@ -925,6 +961,12 @@ type Subscription struct {
 	// Id Stripe subscription ID.
 	Id string `json:"id"`
 
+	// OpenInvoice True when the subscription is delinquent but repairable: it has an open invoice whose payment restores service, so billing can be fixed without starting a new subscription. Absent otherwise.
+	OpenInvoice *bool `json:"open_invoice,omitempty"`
+
+	// OpenInvoiceAmountDue Amount remaining on the open invoice, in the smallest currency unit (e.g. cents). Present only when `open_invoice` is true.
+	OpenInvoiceAmountDue *int64 `json:"open_invoice_amount_due,omitempty"`
+
 	// StartDate When the subscription began, as epoch milliseconds.
 	StartDate *int64 `json:"start_date,omitempty"`
 
@@ -1120,6 +1162,9 @@ type DeploymentUpdateJSONRequestBody = Deployment
 // DeploymentAppLinkCreateJSONRequestBody defines body for DeploymentAppLinkCreate for application/json ContentType.
 type DeploymentAppLinkCreateJSONRequestBody = AppLinkRequest
 
+// DeploymentCredentialCreateJSONRequestBody defines body for DeploymentCredentialCreate for application/json ContentType.
+type DeploymentCredentialCreateJSONRequestBody = DeploymentCredentialRequest
+
 // OrgPaymentMethodSetupSessionCreateJSONRequestBody defines body for OrgPaymentMethodSetupSessionCreate for application/json ContentType.
 type OrgPaymentMethodSetupSessionCreateJSONRequestBody = RedirectRequest
 
@@ -1280,14 +1325,14 @@ type ClientInterface interface {
 	// Deprecated: this operation has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	ClusterBillingSessionCreate(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ClusterCheckoutResumeWithBody Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+	// ClusterCheckoutResumeWithBody Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 	//
 	// Takes any type of body and a specified content type.
 	//
 	// Corresponds with POST /clusters/{id}/checkout (the `ClusterCheckoutResume` operationId).
 	ClusterCheckoutResumeWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ClusterCheckoutResume Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+	// ClusterCheckoutResume Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1804,6 +1849,45 @@ type ClientInterface interface {
 	// Corresponds with POST /deployments/{id}/console-link (the `DeploymentConsoleLinkCreate` operationId).
 	DeploymentConsoleLinkCreate(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeploymentCredentialList List admin credentials for a deployment.
+	//
+	// Lists the credentials created for this deployment, with the `realm-management` roles each one currently holds. Secrets are not included; read one back individually with `deployment.credential.secret.read`.
+	//
+	// Corresponds with GET /deployments/{id}/credentials (the `DeploymentCredentialList` operationId).
+	DeploymentCredentialList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentCredentialCreateWithBody Create an admin credential for a deployment.
+	//
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+	DeploymentCredentialCreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentCredentialCreate Create an admin credential for a deployment.
+	//
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+	DeploymentCredentialCreate(ctx context.Context, id string, body DeploymentCredentialCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentCredentialDelete Revoke an admin credential for a deployment.
+	//
+	// Deletes the client from the deployment's realm, immediately invalidating the credential. Only credentials created through this API can be revoked here.
+	//
+	// Corresponds with DELETE /deployments/{id}/credentials/{clientId} (the `DeploymentCredentialDelete` operationId).
+	DeploymentCredentialDelete(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentCredentialSecretRead Read an admin credential's secret.
+	//
+	// Returns the credential including its client secret, read from the deployment's realm. Phase Two keeps no copy; this asks the realm, which is where the secret lives. Reading does not rotate it, so a tool can fetch it on each run instead of persisting it -- which for Terraform means keeping it out of `terraform.tfstate`.
+	//
+	// Corresponds with GET /deployments/{id}/credentials/{clientId}/secret (the `DeploymentCredentialSecretRead` operationId).
+	DeploymentCredentialSecretRead(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeploymentMetricsDetail Get metrics for a deployment by ID.
 	//
 	// Corresponds with GET /deployments/{id}/metrics (the `DeploymentMetricsDetail` operationId).
@@ -2121,7 +2205,7 @@ func (c *Client) ClusterBillingSessionCreate(ctx context.Context, id string, req
 	return c.Client.Do(req)
 }
 
-// ClusterCheckoutResumeWithBody Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+// ClusterCheckoutResumeWithBody Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 //
 // Takes any type of body and a specified content type.
 //
@@ -2138,7 +2222,7 @@ func (c *Client) ClusterCheckoutResumeWithBody(ctx context.Context, id string, c
 	return c.Client.Do(req)
 }
 
-// ClusterCheckoutResume Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+// ClusterCheckoutResume Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -3295,6 +3379,95 @@ func (c *Client) DeploymentAppLinkCreate(ctx context.Context, id string, body De
 // Corresponds with POST /deployments/{id}/console-link (the `DeploymentConsoleLinkCreate` operationId).
 func (c *Client) DeploymentConsoleLinkCreate(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeploymentConsoleLinkCreateRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentCredentialList List admin credentials for a deployment.
+//
+// Lists the credentials created for this deployment, with the `realm-management` roles each one currently holds. Secrets are not included; read one back individually with `deployment.credential.secret.read`.
+//
+// Corresponds with GET /deployments/{id}/credentials (the `DeploymentCredentialList` operationId).
+func (c *Client) DeploymentCredentialList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentCredentialListRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentCredentialCreateWithBody Create an admin credential for a deployment.
+//
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+func (c *Client) DeploymentCredentialCreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentCredentialCreateRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentCredentialCreate Create an admin credential for a deployment.
+//
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+func (c *Client) DeploymentCredentialCreate(ctx context.Context, id string, body DeploymentCredentialCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentCredentialCreateRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentCredentialDelete Revoke an admin credential for a deployment.
+//
+// Deletes the client from the deployment's realm, immediately invalidating the credential. Only credentials created through this API can be revoked here.
+//
+// Corresponds with DELETE /deployments/{id}/credentials/{clientId} (the `DeploymentCredentialDelete` operationId).
+func (c *Client) DeploymentCredentialDelete(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentCredentialDeleteRequest(c.Server, id, clientId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentCredentialSecretRead Read an admin credential's secret.
+//
+// Returns the credential including its client secret, read from the deployment's realm. Phase Two keeps no copy; this asks the realm, which is where the secret lives. Reading does not rotate it, so a tool can fetch it on each run instead of persisting it -- which for Terraform means keeping it out of `terraform.tfstate`.
+//
+// Corresponds with GET /deployments/{id}/credentials/{clientId}/secret (the `DeploymentCredentialSecretRead` operationId).
+func (c *Client) DeploymentCredentialSecretRead(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentCredentialSecretReadRequest(c.Server, id, clientId)
 	if err != nil {
 		return nil, err
 	}
@@ -6180,6 +6353,169 @@ func NewDeploymentConsoleLinkCreateRequest(server string, id string) (*http.Requ
 	return req, nil
 }
 
+// NewDeploymentCredentialListRequest constructs an http.Request for the DeploymentCredentialList method
+func NewDeploymentCredentialListRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/credentials", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentCredentialCreateRequest calls the generic DeploymentCredentialCreate builder with application/json body
+func NewDeploymentCredentialCreateRequest(server string, id string, body DeploymentCredentialCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeploymentCredentialCreateRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewDeploymentCredentialCreateRequestWithBody constructs an http.Request for the DeploymentCredentialCreate method, with any body, and a specified content type
+func NewDeploymentCredentialCreateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/credentials", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeploymentCredentialDeleteRequest constructs an http.Request for the DeploymentCredentialDelete method
+func NewDeploymentCredentialDeleteRequest(server string, id string, clientId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "clientId", clientId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/credentials/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentCredentialSecretReadRequest constructs an http.Request for the DeploymentCredentialSecretRead method
+func NewDeploymentCredentialSecretReadRequest(server string, id string, clientId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "clientId", clientId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/credentials/%s/secret", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewDeploymentMetricsDetailRequest constructs an http.Request for the DeploymentMetricsDetail method
 func NewDeploymentMetricsDetailRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -6967,14 +7303,14 @@ type ClientWithResponsesInterface interface {
 	// Deprecated: this operation has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	ClusterBillingSessionCreateWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ClusterBillingSessionCreateResponse, error)
 
-	// ClusterCheckoutResumeWithBodyWithResponse Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+	// ClusterCheckoutResumeWithBodyWithResponse Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
 	// Corresponds with POST /clusters/{id}/checkout (the `ClusterCheckoutResume` operationId).
 	ClusterCheckoutResumeWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterCheckoutResumeResponse, error)
 
-	// ClusterCheckoutResumeWithResponse Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+	// ClusterCheckoutResumeWithResponse Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -7548,6 +7884,51 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with POST /deployments/{id}/console-link (the `DeploymentConsoleLinkCreate` operationId).
 	DeploymentConsoleLinkCreateWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentConsoleLinkCreateResponse, error)
+
+	// DeploymentCredentialListWithResponse List admin credentials for a deployment.
+	//
+	// Lists the credentials created for this deployment, with the `realm-management` roles each one currently holds. Secrets are not included; read one back individually with `deployment.credential.secret.read`.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /deployments/{id}/credentials (the `DeploymentCredentialList` operationId).
+	DeploymentCredentialListWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentCredentialListResponse, error)
+
+	// DeploymentCredentialCreateWithBodyWithResponse Create an admin credential for a deployment.
+	//
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+	DeploymentCredentialCreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentCredentialCreateResponse, error)
+
+	// DeploymentCredentialCreateWithResponse Create an admin credential for a deployment.
+	//
+	// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+	DeploymentCredentialCreateWithResponse(ctx context.Context, id string, body DeploymentCredentialCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentCredentialCreateResponse, error)
+
+	// DeploymentCredentialDeleteWithResponse Revoke an admin credential for a deployment.
+	//
+	// Deletes the client from the deployment's realm, immediately invalidating the credential. Only credentials created through this API can be revoked here.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /deployments/{id}/credentials/{clientId} (the `DeploymentCredentialDelete` operationId).
+	DeploymentCredentialDeleteWithResponse(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*DeploymentCredentialDeleteResponse, error)
+
+	// DeploymentCredentialSecretReadWithResponse Read an admin credential's secret.
+	//
+	// Returns the credential including its client secret, read from the deployment's realm. Phase Two keeps no copy; this asks the realm, which is where the secret lives. Reading does not rotate it, so a tool can fetch it on each run instead of persisting it -- which for Terraform means keeping it out of `terraform.tfstate`.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /deployments/{id}/credentials/{clientId}/secret (the `DeploymentCredentialSecretRead` operationId).
+	DeploymentCredentialSecretReadWithResponse(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*DeploymentCredentialSecretReadResponse, error)
 
 	// DeploymentMetricsDetailWithResponse Get metrics for a deployment by ID.
 	//
@@ -9968,6 +10349,163 @@ func (r DeploymentConsoleLinkCreateResponse) ContentType() string {
 	return ""
 }
 
+type DeploymentCredentialListResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]DeploymentCredential
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentCredentialListResponse) GetJSON200() *[]DeploymentCredential {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentCredentialListResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentCredentialListResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentCredentialListResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentCredentialListResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentCredentialCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DeploymentCredential
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentCredentialCreateResponse) GetJSON200() *DeploymentCredential {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentCredentialCreateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentCredentialCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentCredentialCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentCredentialCreateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentCredentialDeleteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentCredentialDeleteResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentCredentialDeleteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentCredentialDeleteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentCredentialDeleteResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentCredentialSecretReadResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *DeploymentCredential
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentCredentialSecretReadResponse) GetJSON200() *DeploymentCredential {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentCredentialSecretReadResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentCredentialSecretReadResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentCredentialSecretReadResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentCredentialSecretReadResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type DeploymentMetricsDetailResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10775,7 +11313,7 @@ func (c *ClientWithResponses) ClusterBillingSessionCreateWithResponse(ctx contex
 	return ParseClusterBillingSessionCreateResponse(rsp)
 }
 
-// ClusterCheckoutResumeWithBodyWithResponse Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+// ClusterCheckoutResumeWithBodyWithResponse Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -10788,7 +11326,7 @@ func (c *ClientWithResponses) ClusterCheckoutResumeWithBodyWithResponse(ctx cont
 	return ParseClusterCheckoutResumeResponse(rsp)
 }
 
-// ClusterCheckoutResumeWithResponse Resume Stripe checkout for a cluster whose billing setup was not completed. Returns a link to complete payment setup within a browser.
+// ClusterCheckoutResumeWithResponse Restore billing for a cluster that is not currently paid for. Returns a browser link: the existing subscription's open invoice when paying it repairs the subscription, otherwise a fresh Stripe checkout for a new subscription.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -11751,6 +12289,81 @@ func (c *ClientWithResponses) DeploymentConsoleLinkCreateWithResponse(ctx contex
 		return nil, err
 	}
 	return ParseDeploymentConsoleLinkCreateResponse(rsp)
+}
+
+// DeploymentCredentialListWithResponse List admin credentials for a deployment.
+//
+// Lists the credentials created for this deployment, with the `realm-management` roles each one currently holds. Secrets are not included; read one back individually with `deployment.credential.secret.read`.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /deployments/{id}/credentials (the `DeploymentCredentialList` operationId).
+func (c *ClientWithResponses) DeploymentCredentialListWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentCredentialListResponse, error) {
+	rsp, err := c.DeploymentCredentialList(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentCredentialListResponse(rsp)
+}
+
+// DeploymentCredentialCreateWithBodyWithResponse Create an admin credential for a deployment.
+//
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+func (c *ClientWithResponses) DeploymentCredentialCreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentCredentialCreateResponse, error) {
+	rsp, err := c.DeploymentCredentialCreateWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentCredentialCreateResponse(rsp)
+}
+
+// DeploymentCredentialCreateWithResponse Create an admin credential for a deployment.
+//
+// Creates a service account client on the deployment's realm for administering that realm directly -- with the Keycloak Terraform provider, a provisioning script, an audit integration, or anything else that speaks Keycloak's admin API. Grants the `realm-management` roles given in `roles`, defaulting to `realm-admin`. The response is the only time the client secret is available; it is not stored and cannot be retrieved again. Create a separate credential per holder so they can be revoked independently.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/credentials (the `DeploymentCredentialCreate` operationId).
+func (c *ClientWithResponses) DeploymentCredentialCreateWithResponse(ctx context.Context, id string, body DeploymentCredentialCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentCredentialCreateResponse, error) {
+	rsp, err := c.DeploymentCredentialCreate(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentCredentialCreateResponse(rsp)
+}
+
+// DeploymentCredentialDeleteWithResponse Revoke an admin credential for a deployment.
+//
+// Deletes the client from the deployment's realm, immediately invalidating the credential. Only credentials created through this API can be revoked here.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /deployments/{id}/credentials/{clientId} (the `DeploymentCredentialDelete` operationId).
+func (c *ClientWithResponses) DeploymentCredentialDeleteWithResponse(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*DeploymentCredentialDeleteResponse, error) {
+	rsp, err := c.DeploymentCredentialDelete(ctx, id, clientId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentCredentialDeleteResponse(rsp)
+}
+
+// DeploymentCredentialSecretReadWithResponse Read an admin credential's secret.
+//
+// Returns the credential including its client secret, read from the deployment's realm. Phase Two keeps no copy; this asks the realm, which is where the secret lives. Reading does not rotate it, so a tool can fetch it on each run instead of persisting it -- which for Terraform means keeping it out of `terraform.tfstate`.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /deployments/{id}/credentials/{clientId}/secret (the `DeploymentCredentialSecretRead` operationId).
+func (c *ClientWithResponses) DeploymentCredentialSecretReadWithResponse(ctx context.Context, id string, clientId string, reqEditors ...RequestEditorFn) (*DeploymentCredentialSecretReadResponse, error) {
+	rsp, err := c.DeploymentCredentialSecretRead(ctx, id, clientId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentCredentialSecretReadResponse(rsp)
 }
 
 // DeploymentMetricsDetailWithResponse Get metrics for a deployment by ID.
@@ -13426,6 +14039,100 @@ func ParseDeploymentConsoleLinkCreateResponse(rsp *http.Response) (*DeploymentCo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ConsoleLink
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentCredentialListResponse parses an HTTP response from a DeploymentCredentialListWithResponse call
+func ParseDeploymentCredentialListResponse(rsp *http.Response) (*DeploymentCredentialListResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentCredentialListResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DeploymentCredential
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentCredentialCreateResponse parses an HTTP response from a DeploymentCredentialCreateWithResponse call
+func ParseDeploymentCredentialCreateResponse(rsp *http.Response) (*DeploymentCredentialCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentCredentialCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeploymentCredential
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentCredentialDeleteResponse parses an HTTP response from a DeploymentCredentialDeleteWithResponse call
+func ParseDeploymentCredentialDeleteResponse(rsp *http.Response) (*DeploymentCredentialDeleteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentCredentialDeleteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentCredentialSecretReadResponse parses an HTTP response from a DeploymentCredentialSecretReadWithResponse call
+func ParseDeploymentCredentialSecretReadResponse(rsp *http.Response) (*DeploymentCredentialSecretReadResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentCredentialSecretReadResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeploymentCredential
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

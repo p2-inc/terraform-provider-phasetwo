@@ -67,6 +67,7 @@ func TestGetProviderSchema(t *testing.T) {
 		"phasetwo_cluster_ip_rules",
 		"phasetwo_cluster_primary_host",
 		"phasetwo_realm",
+		"phasetwo_realm_credential",
 	}
 	for _, name := range wantResources {
 		if _, ok := resp.ResourceSchemas[name]; !ok {
@@ -92,6 +93,32 @@ func TestGetProviderSchema(t *testing.T) {
 	}
 	if got, want := len(resp.DataSourceSchemas), len(wantDataSources); got != want {
 		t.Errorf("registered %d data sources, want %d", got, want)
+	}
+
+	// Ephemeral resources are registered through a separate provider interface, so a resource
+	// added to the wrong list is registered nowhere and fails only at apply time.
+	wantEphemeral := []string{
+		"phasetwo_realm_credential_secret",
+	}
+	for _, name := range wantEphemeral {
+		if _, ok := resp.EphemeralResourceSchemas[name]; !ok {
+			t.Errorf("ephemeral resource %s is not registered", name)
+		}
+	}
+	if got, want := len(resp.EphemeralResourceSchemas), len(wantEphemeral); got != want {
+		t.Errorf("registered %d ephemeral resources, want %d", got, want)
+	}
+
+	// The secret must not be reachable as a resource attribute: that is the whole reason the
+	// ephemeral resource exists, and a well-meaning addition of `client_secret` to the resource
+	// would silently put a realm-admin credential back into terraform.tfstate.
+	if credential, ok := resp.ResourceSchemas["phasetwo_realm_credential"]; ok {
+		for _, attr := range credential.Block.Attributes {
+			if attr.Name == "client_secret" {
+				t.Error("phasetwo_realm_credential must not expose client_secret; " +
+					"Terraform writes attributes to state — use the ephemeral resource")
+			}
+		}
 	}
 }
 
