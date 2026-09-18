@@ -21,12 +21,17 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
+      # GPG_KEY is an organization secret mapped to this repository. It holds the
+      # ASCII-armored private key whose public half is registered with the Terraform
+      # Registry; the registry verifies the signature on every release, so a key
+      # mismatch shows up as a release that is never ingested rather than as a failure
+      # here. The key carries no passphrase, so no passphrase input is supplied --
+      # setting an empty one makes gpg prompt and the step hangs to its timeout.
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
         id: import_gpg
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+          gpg_private_key: ${{ secrets.GPG_KEY }}
 
       - uses: goreleaser/goreleaser-action@v6
         with:
