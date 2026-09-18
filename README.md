@@ -4,7 +4,7 @@ Manage [Phase Two](https://phasetwo.io) hosted Keycloak clusters and the realms 
 
 > [!CAUTION]
 > **Experimental — test environments only.**
-> This provider is at `0.1.0`. Resource and attribute shapes may still change in
+> This provider is pre-1.0. Resource and attribute shapes may still change in
 > backwards-incompatible ways, and what it manages is real, billable infrastructure: replacing a
 > `phasetwo_cluster` destroys it and every realm on it, and destroying one keeps billing and holds
 > the name until the end of the billing cycle. Pin an exact version while it is at `0.x`, and point
