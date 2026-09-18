@@ -9,6 +9,9 @@ on:
       - main
     paths-ignore:
       - 'README.md'
+  # The testacc job below gates on this event. Without it that job is unreachable and
+  # the "run them before cutting a release" note beside it cannot be acted on.
+  workflow_dispatch:
 
 permissions:
   contents: read
