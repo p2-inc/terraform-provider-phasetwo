@@ -13,7 +13,7 @@ browser, so you create them in the Phase Two console and look them up here.
 terraform {
   required_providers {
     phasetwo = {
-      source  = "p2-inc/phasetwo"
+      source  = "p2-inc/terraform-provider-phasetwo"
       version = "~> 0.1"
     }
   }
@@ -117,7 +117,7 @@ To try it locally, add a dev override to `~/.terraformrc`:
 ```hcl
 provider_installation {
   dev_overrides {
-    "p2-inc/phasetwo" = "/path/to/terraform-provider-phasetwo"
+    "p2-inc/terraform-provider-phasetwo" = "/path/to/terraform-provider-phasetwo"
   }
   direct {}
 }

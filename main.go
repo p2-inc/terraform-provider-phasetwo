@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	err := providerserver.Serve(context.Background(), provider.New(version), providerserver.ServeOpts{
-		Address: "registry.terraform.io/p2-inc/phasetwo",
+		Address: "registry.terraform.io/p2-inc/terraform-provider-phasetwo",
 		Debug:   debug,
 	})
 	if err != nil {

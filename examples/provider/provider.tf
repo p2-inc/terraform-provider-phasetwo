@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     phasetwo = {
-      source  = "p2-inc/phasetwo"
+      source  = "p2-inc/terraform-provider-phasetwo"
       version = "~> 0.1"
     }
   }
