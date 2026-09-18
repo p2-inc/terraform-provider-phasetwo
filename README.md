@@ -2,6 +2,14 @@
 
 Manage [Phase Two](https://phasetwo.io) hosted Keycloak clusters and the realms running on them.
 
+> [!CAUTION]
+> **Experimental — test environments only.**
+> This provider is at `0.1.0`. Resource and attribute shapes may still change in
+> backwards-incompatible ways, and what it manages is real, billable infrastructure: replacing a
+> `phasetwo_cluster` destroys it and every realm on it, and destroying one keeps billing and holds
+> the name until the end of the billing cycle. Pin an exact version while it is at `0.x`, and point
+> it at an environment you do not mind breaking.
+
 The provider covers cluster lifecycle and the things configured on a cluster: realms, custom
 domains, IP allow/deny rules, environment variables and extensions. Organizations (teams) and
 payment methods are **referenced, not managed** — both involve flows that only make sense in a

@@ -7,6 +7,12 @@ description: |-
 
 # Phase Two Provider
 
+!> **Experimental — test environments only.** This provider is at `0.1.0`. Resource and attribute
+shapes may still change in backwards-incompatible ways, and what it manages is real, billable
+infrastructure: replacing a `phasetwo_cluster` destroys it and every realm on it, and destroying one
+keeps billing and holds the name until the end of the billing cycle. Pin an exact version while it
+is at `0.x`, and point it at an environment you do not mind breaking.
+
 Manage [Phase Two](https://phasetwo.io) hosted Keycloak as code: dedicated clusters, the realms on
 them, custom domains, IP allow and deny lists, environment variables, and custom providers and
 themes.
