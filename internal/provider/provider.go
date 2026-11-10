@@ -179,6 +179,8 @@ func (p *phasetwoProvider) Resources(_ context.Context) []func() resource.Resour
 		NewExtensionResource,
 		NewExtensionVersionResource,
 		NewRealmCredentialResource,
+		NewGatewayAppResource,
+		NewGatewayAppActivationResource,
 	}
 }
 
