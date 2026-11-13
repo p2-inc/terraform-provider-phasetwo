@@ -131,6 +131,24 @@ func (e ClusterState) Valid() bool {
 	}
 }
 
+// Defines values for ClusterWorkspaceStatusWorkspace.
+const (
+	APPSDEPLOY ClusterWorkspaceStatusWorkspace = "APPS_DEPLOY"
+	APPSINFRA  ClusterWorkspaceStatusWorkspace = "APPS_INFRA"
+)
+
+// Valid indicates whether the value is a known member of the ClusterWorkspaceStatusWorkspace enum.
+func (e ClusterWorkspaceStatusWorkspace) Valid() bool {
+	switch e {
+	case APPSDEPLOY:
+		return true
+	case APPSINFRA:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for DeploymentState.
 const (
 	DeploymentStateACTIVE   DeploymentState = "ACTIVE"
@@ -149,6 +167,39 @@ func (e DeploymentState) Valid() bool {
 	case DeploymentStateFAILED:
 		return true
 	case DeploymentStatePENDING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DnsRouting.
+const (
+	AMBIGUOUS         DnsRouting = "AMBIGUOUS"
+	CLOUDFLAREPROXIED DnsRouting = "CLOUDFLARE_PROXIED"
+	CNAMEELSEWHERE    DnsRouting = "CNAME_ELSEWHERE"
+	CNAMETOTARGET     DnsRouting = "CNAME_TO_TARGET"
+	FLATTENED         DnsRouting = "FLATTENED"
+	NOTRESOLVING      DnsRouting = "NOT_RESOLVING"
+	OTHERADDRESSES    DnsRouting = "OTHER_ADDRESSES"
+)
+
+// Valid indicates whether the value is a known member of the DnsRouting enum.
+func (e DnsRouting) Valid() bool {
+	switch e {
+	case AMBIGUOUS:
+		return true
+	case CLOUDFLAREPROXIED:
+		return true
+	case CNAMEELSEWHERE:
+		return true
+	case CNAMETOTARGET:
+		return true
+	case FLATTENED:
+		return true
+	case NOTRESOLVING:
+		return true
+	case OTHERADDRESSES:
 		return true
 	default:
 		return false
@@ -629,6 +680,21 @@ type ClusterNamePrefix struct {
 	Prefix string `json:"prefix"`
 }
 
+// ClusterRunningWorkflows Who holds each of a cluster's workspaces, and who is waiting.
+type ClusterRunningWorkflows struct {
+	ClusterId   string `json:"cluster_id"`
+	ClusterName string `json:"cluster_name"`
+
+	// OrganizationId The organization that owns the cluster. Absent for a shared cluster.
+	OrganizationId *string `json:"organization_id,omitempty"`
+
+	// OrganizationName Absent for a shared cluster.
+	OrganizationName *string `json:"organization_name,omitempty"`
+
+	// Workspaces Both workspaces, apps-infra first, even a free one.
+	Workspaces []ClusterWorkspaceStatus `json:"workspaces"`
+}
+
 // ClusterState Lifecycle state of a dedicated cluster.
 type ClusterState string
 
@@ -655,6 +721,45 @@ type ClusterSystemInfoRepresentation struct {
 	UserTimezone   *string `json:"userTimezone,omitempty"`
 	Version        *string `json:"version,omitempty"`
 }
+
+// ClusterWorkspaceEntry A workflow holding or waiting for a workspace.
+type ClusterWorkspaceEntry struct {
+	// GrantedAt When it was given the workspace (ISO-8601). Absent while waiting.
+	GrantedAt *string `json:"granted_at,omitempty"`
+
+	// QueuedAt When the workflow got in line (ISO-8601).
+	QueuedAt string `json:"queued_at"`
+
+	// RunId The run that holds the workspace or last checked its place. Absent until the workflow first checks.
+	RunId *string `json:"run_id,omitempty"`
+
+	// TemporalUrl The run on the Temporal UI, or the workflow without a run ID. Absent when Temporal isn't configured.
+	TemporalUrl *string `json:"temporal_url,omitempty"`
+
+	// TrackingIssueUrl The workflow's tracking issue on GitHub. Absent until the workflow opens it, or when the workflow didn't answer in time.
+	TrackingIssueUrl *string `json:"tracking_issue_url,omitempty"`
+
+	// WorkflowId The Temporal workflow ID, e.g. `upgrade-cluster-acme`.
+	WorkflowId string `json:"workflow_id"`
+
+	// WorkflowType The Temporal workflow type, e.g. `UpgradeClusterWorkflow`.
+	WorkflowType string `json:"workflow_type"`
+}
+
+// ClusterWorkspaceStatus Who holds one of a cluster's workspaces, and who is waiting for it.
+type ClusterWorkspaceStatus struct {
+	// Holder The workflow changing the workspace. Absent when nobody holds it.
+	Holder *ClusterWorkspaceEntry `json:"holder,omitempty"`
+
+	// Queue The workflows waiting for the workspace, first in line first. A workflow that needs both workspaces is in both queues, and one queued behind it waits for it even when its own workspace is free.
+	Queue []ClusterWorkspaceEntry `json:"queue"`
+
+	// Workspace `APPS_INFRA` (the cluster's Terraform: DNS, certificates, CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag, replicas, env vars, extensions).
+	Workspace ClusterWorkspaceStatusWorkspace `json:"workspace"`
+}
+
+// ClusterWorkspaceStatusWorkspace `APPS_INFRA` (the cluster's Terraform: DNS, certificates, CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag, replicas, env vars, extensions).
+type ClusterWorkspaceStatusWorkspace string
 
 // ConsoleLink defines model for ConsoleLink.
 type ConsoleLink struct {
@@ -816,6 +921,40 @@ type DeploymentState string
 // DeprovisionRequest defines model for DeprovisionRequest.
 type DeprovisionRequest struct {
 	Confirm *string `json:"confirm,omitempty"`
+}
+
+// DnsRouting How a custom domain's public DNS reaches the cluster.
+type DnsRouting string
+
+// DnsRoutingCheck The DNS routing of a cluster's custom domains.
+type DnsRoutingCheck struct {
+	// Debounced True when the cluster was checked moments ago, so this is the stored state and no resolver was asked.
+	Debounced *bool               `json:"debounced,omitempty"`
+	Domains   *[]DomainDnsRouting `json:"domains,omitempty"`
+}
+
+// DomainDnsRouting How a custom domain's public DNS reaches its cluster.
+type DomainDnsRouting struct {
+	// CheckedAt When the classification was last confirmed, as epoch milliseconds.
+	CheckedAt *int64 `json:"checkedAt,omitempty"`
+
+	// Detail What the classification was based on: the CNAME chain and addresses.
+	Detail *string `json:"detail,omitempty"`
+
+	// Domain The custom hostname.
+	Domain *string `json:"domain,omitempty"`
+
+	// Error Why this check could not classify the domain (no answer in time, SERVFAIL, the resolvers disagreeing). The stored classification is left as it was. Only in a check's response.
+	Error *string `json:"error,omitempty"`
+
+	// Id ID of the custom domain.
+	Id *string `json:"id,omitempty"`
+
+	// Resolvers What each resolver saw. Only in a check's response.
+	Resolvers *[]ResolverAnswer `json:"resolvers,omitempty"`
+
+	// Routing The last successful classification, or null if none has succeeded yet.
+	Routing *DnsRouting `json:"routing,omitempty"`
 }
 
 // DomainRecord A single DNS record to create for domain validation.
@@ -1387,6 +1526,16 @@ type Region struct {
 	Region string `json:"region"`
 }
 
+// ResolverAnswer What one resolver saw.
+type ResolverAnswer struct {
+	Detail   *string `json:"detail,omitempty"`
+	Error    *string `json:"error,omitempty"`
+	Resolver *string `json:"resolver,omitempty"`
+
+	// Routing How a custom domain's public DNS reaches the cluster.
+	Routing *DnsRouting `json:"routing,omitempty"`
+}
+
 // ResourceLimits defines model for ResourceLimits.
 type ResourceLimits string
 
@@ -1413,6 +1562,15 @@ type ResumeCheckoutRequest struct {
 type RootRedirect struct {
 	// Url An https URL on the same registrable domain as the custom domain, or on the domain of another custom domain of the cluster. Null or empty clears the redirect.
 	Url nullable.Nullable[string] `json:"url,omitempty"`
+}
+
+// RunningWorkflows The workflows changing clusters' workspaces, and those waiting to.
+type RunningWorkflows struct {
+	// Clusters Only the clusters with a workflow holding or waiting, by name.
+	Clusters []ClusterRunningWorkflows `json:"clusters"`
+
+	// TemporalUrl The Temporal UI's workflow list, where finished workflows can be browsed. Absent when Temporal isn't configured.
+	TemporalUrl *string `json:"temporal_url,omitempty"`
 }
 
 // Secret defines model for Secret.

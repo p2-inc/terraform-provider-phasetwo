@@ -2895,6 +2895,30 @@ components:
           description: The prefix new cluster names in this environment should start
             with. Empty when the environment has none.
           type: string
+    ClusterRunningWorkflows:
+      description: "Who holds each of a cluster's workspaces, and who is waiting."
+      required:
+      - cluster_id
+      - cluster_name
+      - workspaces
+      type: object
+      properties:
+        cluster_id:
+          type: string
+        cluster_name:
+          type: string
+        organization_id:
+          description: The organization that owns the cluster. Absent for a shared
+            cluster.
+          type: string
+        organization_name:
+          description: Absent for a shared cluster.
+          type: string
+        workspaces:
+          description: "Both workspaces, apps-infra first, even a free one."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterWorkspaceStatus"
     ClusterState:
       description: Lifecycle state of a dedicated cluster.
       enum:
@@ -2953,6 +2977,67 @@ components:
             \ or `untagged` for a pre-phasetwo-containers#176 image. Null if the cluster's\
             \ serverinfo couldn't be fetched."
           type: string
+    ClusterWorkspaceEntry:
+      description: A workflow holding or waiting for a workspace.
+      required:
+      - workflow_id
+      - workflow_type
+      - queued_at
+      type: object
+      properties:
+        workflow_id:
+          description: "The Temporal workflow ID, e.g. `upgrade-cluster-acme`."
+          type: string
+        workflow_type:
+          description: "The Temporal workflow type, e.g. `UpgradeClusterWorkflow`."
+          type: string
+        run_id:
+          description: The run that holds the workspace or last checked its place.
+            Absent until the workflow first checks.
+          type: string
+        queued_at:
+          description: When the workflow got in line (ISO-8601).
+          type: string
+        granted_at:
+          description: When it was given the workspace (ISO-8601). Absent while waiting.
+          type: string
+        temporal_url:
+          description: "The run on the Temporal UI, or the workflow without a run\
+            \ ID. Absent when Temporal isn't configured."
+          type: string
+        tracking_issue_url:
+          description: "The workflow's tracking issue on GitHub. Absent until the\
+            \ workflow opens it, or when the workflow didn't answer in time."
+          type: string
+    ClusterWorkspaceStatus:
+      description: "Who holds one of a cluster's workspaces, and who is waiting for\
+        \ it."
+      required:
+      - workspace
+      - queue
+      type: object
+      properties:
+        workspace:
+          description: "`APPS_INFRA` (the cluster's Terraform: DNS, certificates,\
+            \ CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag,\
+            \ replicas, env vars, extensions)."
+          enum:
+          - APPS_INFRA
+          - APPS_DEPLOY
+          type: string
+        holder:
+          description: The workflow changing the workspace. Absent when nobody holds
+            it.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/ClusterWorkspaceEntry"
+        queue:
+          description: "The workflows waiting for the workspace, first in line first.\
+            \ A workflow that needs both workspaces is in both queues, and one queued\
+            \ behind it waits for it even when its own workspace is free."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterWorkspaceEntry"
     ConsoleLink:
       required:
       - user_id
@@ -3213,6 +3298,63 @@ components:
       properties:
         confirm:
           type: string
+    DnsRouting:
+      description: How a custom domain's public DNS reaches the cluster.
+      enum:
+      - CNAME_TO_TARGET
+      - CLOUDFLARE_PROXIED
+      - FLATTENED
+      - CNAME_ELSEWHERE
+      - OTHER_ADDRESSES
+      - NOT_RESOLVING
+      - AMBIGUOUS
+      type: string
+    DnsRoutingCheck:
+      description: The DNS routing of a cluster's custom domains.
+      type: object
+      properties:
+        debounced:
+          description: "True when the cluster was checked moments ago, so this is\
+            \ the stored state and no resolver was asked."
+          type: boolean
+        domains:
+          type: array
+          items:
+            $ref: "#/components/schemas/DomainDnsRouting"
+    DomainDnsRouting:
+      description: How a custom domain's public DNS reaches its cluster.
+      type: object
+      properties:
+        id:
+          description: ID of the custom domain.
+          type: string
+        domain:
+          description: The custom hostname.
+          type: string
+        routing:
+          description: "The last successful classification, or null if none has succeeded\
+            \ yet."
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/DnsRouting"
+        detail:
+          description: "What the classification was based on: the CNAME chain and\
+            \ addresses."
+          type: string
+        checkedAt:
+          format: int64
+          description: "When the classification was last confirmed, as epoch milliseconds."
+          type: integer
+        error:
+          description: "Why this check could not classify the domain (no answer in\
+            \ time, SERVFAIL, the resolvers disagreeing). The stored classification\
+            \ is left as it was. Only in a check's response."
+          type: string
+        resolvers:
+          description: What each resolver saw. Only in a check's response.
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolverAnswer"
     DomainRecord:
       description: A single DNS record to create for domain validation.
       required:
@@ -4066,6 +4208,18 @@ components:
         region:
           description: Provider-specific region code.
           type: string
+    ResolverAnswer:
+      description: What one resolver saw.
+      type: object
+      properties:
+        resolver:
+          type: string
+        routing:
+          $ref: "#/components/schemas/DnsRouting"
+        detail:
+          type: string
+        error:
+          type: string
     ResourceLimits:
       enum:
       - standard
@@ -4114,6 +4268,22 @@ components:
             \ or empty clears the redirect."
           type: string
           nullable: true
+    RunningWorkflows:
+      description: "The workflows changing clusters' workspaces, and those waiting\
+        \ to."
+      required:
+      - clusters
+      type: object
+      properties:
+        temporal_url:
+          description: "The Temporal UI's workflow list, where finished workflows\
+            \ can be browsed. Absent when Temporal isn't configured."
+          type: string
+        clusters:
+          description: "Only the clusters with a workflow holding or waiting, by name."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterRunningWorkflows"
     Secret:
       required:
       - id
