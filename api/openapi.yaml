@@ -3,7 +3,7 @@ openapi: 3.0.3
 info:
   title: Phase Two Cluster Management API
   description: |-
-    Automate management of your Phase Two hosted Keycloak clusters: dedicated clusters, deployments (realms), custom domains, extensions, environment variables, IP rules, organizations, and billing.
+    Automate management of your Phase Two hosted Keycloak clusters: dedicated clusters, deployments (realms), custom domains, extensions, environment variables, IP rules, Gateway apps, organizations, and billing.
 
     This is the **control plane** API. It manages clusters themselves -- creating them, adding realms, attaching domains -- and is entirely separate from the Keycloak Admin REST API you use to configure what lives *inside* a realm.
 
@@ -79,6 +79,9 @@ tags:
   description: IP allow/deny rules for a dedicated cluster.
 - name: logs
   description: Log access for a dedicated cluster.
+- name: gateway
+  description: "Websites behind Keycloak login on a deployment's realm, without changing\
+    \ the website."
 paths:
   /clusters:
     get:
@@ -144,6 +147,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NameAvailability"
+  /clusters/name-prefix:
+    get:
+      tags:
+      - clusters
+      summary: Get the cluster name prefix for this environment.
+      description: "Returns the prefix new dedicated cluster names in this environment\
+        \ should start with, or an empty prefix when the environment has none."
+      operationId: cluster.namePrefix.get
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClusterNamePrefix"
   /clusters/regions:
     get:
       tags:
@@ -355,9 +373,9 @@ paths:
       tags:
       - clusters
       summary: Check whether a deployment name is available on a cluster.
-      description: "Validates a candidate name for a new deployment on this cluster\
-        \ and reports whether it is available (well-formed, not reserved, and not\
-        \ already in use on this cluster)."
+      description: Validates a candidate name for a new deployment on this cluster
+        and reports whether it is available (well-formed and not already in use on
+        this cluster).
       operationId: cluster.deployment.nameAvailability.check
       parameters:
       - name: name
@@ -442,12 +460,57 @@ paths:
       tags:
       - customer-domains
       summary: Remove a custom domain by ID.
-      description: "Deletes a custom domain from the cluster. If it is currently the\
-        \ cluster's primary hostname, switch the primary hostname away from it first."
+      description: "Deletes a custom domain from the cluster. If it serves the cluster's\
+        \ primary hostname (it is that hostname, or a wildcard covering it), switch\
+        \ the primary hostname away from it first."
       operationId: cluster.domain.delete
       responses:
         "204":
           description: Custom domain removed.
+        "409":
+          description: "The domain serves the cluster's primary hostname, or it is\
+            \ being activated; or, with a manual teardown, the cluster's custom domains\
+            \ are being changed. Retry later."
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: domainId
+      in: path
+      required: true
+      schema:
+        type: string
+  /clusters/{id}/domains/{domainId}/root-redirect:
+    put:
+      tags:
+      - customer-domains
+      summary: Set or clear a custom domain's root redirect.
+      description: "Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`)\
+        \ are sent to this URL with a 302 instead of seeing a neutral page. The URL\
+        \ must use https and be on the same registrable domain as the custom domain\
+        \ or as another custom domain of the cluster, and the domain's certificate\
+        \ must be issued. Send a null or empty url to clear it. Takes effect within\
+        \ seconds."
+      operationId: cluster.domain.rootRedirect.update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RootRedirect"
+      responses:
+        "200":
+          description: Root redirect updated. Returns the custom domain.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerDomain"
+        "400":
+          description: The URL is not acceptable.
+        "409":
+          description: "The feature has not reached this cluster yet, or the domain's\
+            \ certificate is not issued."
     parameters:
     - name: id
       in: path
@@ -750,9 +813,10 @@ paths:
       tags:
       - extensions
       summary: Create an upload URL for a standalone extension.
-      description: "Creates the extension's single (version-independent) version and\
-        \ returns a presigned S3 URL to upload its jar to. After uploading, call the\
-        \ extension's `confirm` operation to finalize it."
+      description: "Starts a new upload of the extension's single (version-independent)\
+        \ file and returns a presigned S3 URL to upload it to. After uploading, call\
+        \ the extension's `confirm` operation to finalize it. The currently deployed\
+        \ file stays in place until that confirm succeeds."
       operationId: cluster.extension.standalone.uploadUrl.create
       requestBody:
         description: Label for the new version.
@@ -784,8 +848,10 @@ paths:
       tags:
       - extensions
       summary: Confirm a standalone extension upload.
-      description: "Verifies the jar was uploaded to the presigned URL and records\
-        \ its location on the extension version, making it available for deployment."
+      description: "Verifies the file was uploaded to the presigned URL, records its\
+        \ location on the pending version, and replaces the previously deployed version\
+        \ with it. Repeating a confirm that already succeeded returns the confirmed\
+        \ version."
       operationId: cluster.extension.standalone.confirm
       requestBody:
         description: The S3 resource key the jar was uploaded to.
@@ -1105,9 +1171,11 @@ paths:
       - extensions
       summary: Set the change-password redirect for a custom domain.
       description: "Password managers fetch /.well-known/change-password to offer\
-        \ a \"change password\" action. Send a null or empty url to clear it, which\
-        \ returns the path to 404 — spec-safe, and simply means the site does not\
-        \ advertise the convention."
+        \ a \"change password\" action; the edge answers it with a 302 to this URL,\
+        \ which must be https on the same domain. Send a null or empty url to clear\
+        \ it, which returns the path to 404 — spec-safe, and simply means the site\
+        \ does not advertise the convention. Setting one needs the domain's certificate\
+        \ issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`)."
       operationId: cluster.wellKnown.changePassword.set
       requestBody:
         content:
@@ -1432,6 +1500,35 @@ paths:
       required: true
       schema:
         type: string
+  /clusters/{id}/remove-now:
+    post:
+      tags:
+      - clusters
+      summary: Remove a trial cluster now.
+      description: "Tears down a trial cluster that is already scheduled for deletion\
+        \ immediately, instead of at the end of the trial. The body's `confirm` must\
+        \ equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot\
+        \ be undone."
+      operationId: cluster.removeNow
+      requestBody:
+        description: Confirmation of the removal.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeprovisionRequest"
+        required: true
+      responses:
+        "204":
+          description: Teardown started.
+        "409":
+          description: "The cluster is not scheduled for deletion, is not a trial,\
+            \ or is already being torn down."
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
   /clusters/{id}/restart-status:
     get:
       tags:
@@ -1460,7 +1557,8 @@ paths:
       - clusters
       summary: Get system info for a dedicated cluster.
       description: "Returns the cluster's Keycloak server info (version, build time,\
-        \ etc). Only available while the cluster is ACTIVE."
+        \ etc) plus its Phase Two release build tag (issue #538). Only available while\
+        \ the cluster is ACTIVE."
       operationId: cluster.systemInfo.detail
       responses:
         "200":
@@ -1468,7 +1566,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SystemInfoRepresentation"
+                $ref: "#/components/schemas/ClusterSystemInfoRepresentation"
     parameters:
     - name: id
       in: path
@@ -1508,6 +1606,8 @@ paths:
           description: "Invalid endpoint, token or unsupported setting"
         "401":
           description: Insufficient permissions
+        "403":
+          description: Telemetry export is not available on this cluster's tier
         "503":
           description: Saved but could not be published
     parameters:
@@ -1537,6 +1637,8 @@ paths:
           description: Validation outcome
         "401":
           description: Insufficient permissions
+        "403":
+          description: Telemetry export is not available on this cluster's tier
     parameters:
     - name: id
       in: path
@@ -1592,8 +1694,9 @@ paths:
       tags:
       - deployments
       summary: Remove a deployment by ID.
-      description: Permanently deletes a deployment (realm). Only the owner may delete
-        it.
+      description: Permanently deletes a deployment (realm). Allowed for the realm's
+        owner (its creator) and for members of the cluster's organization with the
+        manage-clusters role.
       operationId: deployment.delete
       parameters:
       - name: id
@@ -1605,6 +1708,8 @@ paths:
       responses:
         "204":
           description: Deployment removed.
+        "403":
+          description: The caller is neither the realm's owner nor holds manage-clusters.
   /deployments/{id}/app-link:
     post:
       tags:
@@ -1635,6 +1740,273 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ConsoleLink"
+  /deployments/{id}/apps:
+    get:
+      tags:
+      - gateway
+      summary: List protected apps for a deployment.
+      operationId: deployment.protectedApp.list
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProtectedApp"
+    post:
+      tags:
+      - gateway
+      summary: Create a protected app.
+      description: "Creates an OIDC client for the app in this deployment's realm,\
+        \ generates its origin secret and requests its Cloudflare hostname. The secret\
+        \ is in this response and is never shown again. The app stays PENDING until\
+        \ verified and activated."
+      operationId: deployment.protectedApp.create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProtectedAppRequest"
+      responses:
+        "201":
+          description: Created; includes the one-time origin secret.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedAppSecret"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}:
+    get:
+      tags:
+      - gateway
+      summary: "Get a protected app, with live hostname and readiness status."
+      operationId: deployment.protectedApp.detail
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    put:
+      tags:
+      - gateway
+      summary: Update a protected app.
+      description: "Changes take effect on the next request when the app is active.\
+        \ The public hostname cannot change; the origin can only change while the\
+        \ app is not active, and changing it clears the verification."
+      operationId: deployment.protectedApp.update
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProtectedAppRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    delete:
+      tags:
+      - gateway
+      summary: Delete a protected app.
+      description: "Stops serving it immediately, then removes its Cloudflare hostname\
+        \ and the OIDC client Phase Two created."
+      operationId: deployment.protectedApp.delete
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Deleted.
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}/activate:
+    post:
+      tags:
+      - gateway
+      summary: Start serving a protected app.
+      description: "Requires a VERIFIED origin, an active Cloudflare hostname and\
+        \ certificate, and a realm whose discovery still matches the app's issuer.\
+        \ 409 with the missing piece otherwise."
+      operationId: deployment.protectedApp.activate
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}/deactivate:
+    post:
+      tags:
+      - gateway
+      summary: Stop serving a protected app immediately and end its sessions.
+      operationId: deployment.protectedApp.deactivate
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}/origin-secret/promote:
+    post:
+      tags:
+      - gateway
+      summary: Start sending the rotated secret.
+      description: Requires the rotated secret to have been verified. Then remove
+        the old one from your ingress.
+      operationId: deployment.protectedApp.secret.promote
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}/origin-secret/rotate:
+    post:
+      tags:
+      - gateway
+      summary: Issue a new origin secret.
+      description: "Returns the new secret once. The Worker keeps sending the current\
+        \ one until `promote`, so add the new value to your ingress alongside the\
+        \ old first."
+      operationId: deployment.protectedApp.secret.rotate
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedAppSecret"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
+  /deployments/{id}/apps/{appId}/verify:
+    post:
+      tags:
+      - gateway
+      summary: Verify that the origin requires the secret.
+      description: "Sends four probes to the health path: with the secret, without\
+        \ it, with a wrong one, and with forged identity headers. Only an explicit\
+        \ 401/403 for the last three counts. `secret=next` tests a rotated secret\
+        \ before it is promoted."
+      operationId: deployment.protectedApp.verify
+      parameters:
+      - name: appId
+        in: path
+        description: Protected app ID.
+        required: true
+        schema:
+          type: string
+      - name: secret
+        in: query
+        description: '`current` (default) or `next`.'
+        schema:
+          default: current
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtectedApp"
+    parameters:
+    - name: id
+      in: path
+      description: ID of the deployment.
+      required: true
+      schema:
+        type: string
   /deployments/{id}/console-link:
     post:
       tags:
@@ -1814,6 +2186,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TokenResponse"
+  /me:
+    delete:
+      summary: Delete your own account.
+      description: "Deletes your account, leaving or deleting your organizations as\
+        \ the deletion preview describes. `confirm` must equal the preview's `confirmation`.\
+        \ Requires a login in the last 5 minutes. This cannot be undone."
+      operationId: me.delete
+      requestBody:
+        description: Confirmation of the deletion.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeprovisionRequest"
+        required: true
+      responses:
+        "204":
+          description: Account deleted.
+        "403":
+          description: "The last login is too old; sign in again (`error: reauthentication_required`)."
+        "409":
+          description: Something blocks the deletion. The body is the deletion preview.
+  /me/deletion-preview:
+    get:
+      summary: Preview deleting your own account.
+      description: "What deleting your account would do to each of your organizations,\
+        \ and anything that has to be resolved first."
+      operationId: me.deletionPreview
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionPreview"
   /orgs:
     get:
       tags:
@@ -1831,6 +2237,26 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Org"
+  /orgs/{orgId}:
+    delete:
+      tags:
+      - orgs
+      summary: Delete an organization.
+      description: Deletes the organization. Refused with 409 while it still has a
+        cluster that has not been torn down. This cannot be undone.
+      operationId: org.delete
+      parameters:
+      - name: orgId
+        in: path
+        description: ID of the organization.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Organization deleted.
+        "409":
+          description: The organization still has clusters or deployments.
   /orgs/{orgId}/billing/contacts:
     get:
       tags:
@@ -2179,6 +2605,72 @@ paths:
         type: string
 components:
   schemas:
+    AccountDeletionOrganization:
+      description: "One of the user's organizations, and what deleting the account\
+        \ does to it."
+      required:
+      - id
+      - name
+      - outcome
+      type: object
+      properties:
+        id:
+          description: Organization id.
+          type: string
+        name:
+          description: Organization name.
+          type: string
+        displayName:
+          description: "Display name, when set."
+          type: string
+        outcome:
+          $ref: "#/components/schemas/AccountDeletionOutcome"
+        blockers:
+          description: "Why the account can't be deleted yet, when the outcome is\
+            \ BLOCKED. Human-readable."
+          type: array
+          items:
+            type: string
+        successorEmail:
+          description: "For LEAVE: the member who keeps managing the organization,\
+            \ and who becomes its billing email if the user was."
+          type: string
+    AccountDeletionOutcome:
+      description: What deleting the account does to one of the user's organizations.
+      enum:
+      - LEAVE
+      - DELETE
+      - BLOCKED
+      type: string
+    AccountDeletionPreview:
+      description: "What deleting a user's account would do, and whether it can be\
+        \ done now."
+      required:
+      - userId
+      - username
+      - deletable
+      - confirmation
+      - organizations
+      type: object
+      properties:
+        userId:
+          description: User id.
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        deletable:
+          description: True when nothing blocks the deletion. False when any organization
+            is BLOCKED.
+          type: boolean
+        confirmation:
+          description: The exact string the deletion request's `confirm` must equal.
+          type: string
+        organizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountDeletionOrganization"
     AdminBlockExtensionVersionRequest:
       required:
       - blocked
@@ -2253,6 +2745,7 @@ components:
       - status
       - tier
       - resource_limits
+      - telemetry_export_available
       - created_at
       type: object
       properties:
@@ -2313,10 +2806,39 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/ResourceLimits"
+        telemetry_export_available:
+          description: "Whether this cluster may configure telemetry export: an Enterprise\
+            \ entitlement, or any tier when the cluster is exempt from resource limits.\
+            \ Computed server-side so clients do not re-derive the rule from `tier`\
+            \ and `resource_limits`."
+          type: boolean
+        waf_rate_limit:
+          format: int32
+          description: Requests one client IP may send to the cluster in a trailing
+            5-minute window before further requests are rejected with HTTP 429. Set
+            by the tier.
+          type: integer
         created_at:
           format: int64
           description: "When the cluster was created, as epoch milliseconds."
           type: integer
+        billing_required_reason:
+          description: "Why a `BILLING_REQUIRED` cluster was suspended: `payment-failed`,\
+            \ `subscription-deleted`, `trial-conversion-failed` or `trial-ended`.\
+            \ Absent in other states."
+          type: string
+        billing_required_at:
+          description: When a `BILLING_REQUIRED` cluster was suspended (ISO-8601).
+            Absent in other states.
+          type: string
+        teardown_at:
+          description: When a `BILLING_REQUIRED` cluster will be removed unless billing
+            is resolved (ISO-8601). Absent when no removal is scheduled.
+          type: string
+        data_purge_at:
+          description: When a removed cluster's retained data will be permanently
+            deleted (ISO-8601). Absent when the data is not retained after removal.
+          type: string
     ClusterCreationResult:
       required:
       - requires_action
@@ -2364,6 +2886,39 @@ components:
         host:
           description: "The custom hostname, e.g. `auth.example.com`."
           type: string
+    ClusterNamePrefix:
+      required:
+      - prefix
+      type: object
+      properties:
+        prefix:
+          description: The prefix new cluster names in this environment should start
+            with. Empty when the environment has none.
+          type: string
+    ClusterRunningWorkflows:
+      description: "Who holds each of a cluster's workspaces, and who is waiting."
+      required:
+      - cluster_id
+      - cluster_name
+      - workspaces
+      type: object
+      properties:
+        cluster_id:
+          type: string
+        cluster_name:
+          type: string
+        organization_id:
+          description: The organization that owns the cluster. Absent for a shared
+            cluster.
+          type: string
+        organization_name:
+          description: Absent for a shared cluster.
+          type: string
+        workspaces:
+          description: "Both workspaces, apps-infra first, even a free one."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterWorkspaceStatus"
     ClusterState:
       description: Lifecycle state of a dedicated cluster.
       enum:
@@ -2377,6 +2932,112 @@ components:
       - PENDING_DELETION
       - ARCHIVED
       type: string
+    ClusterSystemInfoRepresentation:
+      type: object
+      properties:
+        version:
+          type: string
+        serverTime:
+          type: string
+        uptime:
+          type: string
+        uptimeMillis:
+          format: int64
+          type: integer
+        javaVersion:
+          type: string
+        javaVendor:
+          type: string
+        javaVm:
+          type: string
+        javaVmVersion:
+          type: string
+        javaRuntime:
+          type: string
+        javaHome:
+          type: string
+        osName:
+          type: string
+        osArchitecture:
+          type: string
+        osVersion:
+          type: string
+        fileEncoding:
+          type: string
+        userName:
+          type: string
+        userDir:
+          type: string
+        userTimezone:
+          type: string
+        userLocale:
+          type: string
+        buildTag:
+          description: "This cluster's Phase Two release build tag (e.g. `26.6.6.1787589931`),\
+            \ or `untagged` for a pre-phasetwo-containers#176 image. Null if the cluster's\
+            \ serverinfo couldn't be fetched."
+          type: string
+    ClusterWorkspaceEntry:
+      description: A workflow holding or waiting for a workspace.
+      required:
+      - workflow_id
+      - workflow_type
+      - queued_at
+      type: object
+      properties:
+        workflow_id:
+          description: "The Temporal workflow ID, e.g. `upgrade-cluster-acme`."
+          type: string
+        workflow_type:
+          description: "The Temporal workflow type, e.g. `UpgradeClusterWorkflow`."
+          type: string
+        run_id:
+          description: The run that holds the workspace or last checked its place.
+            Absent until the workflow first checks.
+          type: string
+        queued_at:
+          description: When the workflow got in line (ISO-8601).
+          type: string
+        granted_at:
+          description: When it was given the workspace (ISO-8601). Absent while waiting.
+          type: string
+        temporal_url:
+          description: "The run on the Temporal UI, or the workflow without a run\
+            \ ID. Absent when Temporal isn't configured."
+          type: string
+        tracking_issue_url:
+          description: "The workflow's tracking issue on GitHub. Absent until the\
+            \ workflow opens it, or when the workflow didn't answer in time."
+          type: string
+    ClusterWorkspaceStatus:
+      description: "Who holds one of a cluster's workspaces, and who is waiting for\
+        \ it."
+      required:
+      - workspace
+      - queue
+      type: object
+      properties:
+        workspace:
+          description: "`APPS_INFRA` (the cluster's Terraform: DNS, certificates,\
+            \ CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag,\
+            \ replicas, env vars, extensions)."
+          enum:
+          - APPS_INFRA
+          - APPS_DEPLOY
+          type: string
+        holder:
+          description: The workflow changing the workspace. Absent when nobody holds
+            it.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/ClusterWorkspaceEntry"
+        queue:
+          description: "The workflows waiting for the workspace, first in line first.\
+            \ A workflow that needs both workspaces is in both queues, and one queued\
+            \ behind it waits for it even when its own workspace is free."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterWorkspaceEntry"
     ConsoleLink:
       required:
       - user_id
@@ -2426,6 +3087,21 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DomainRecord"
+        rootRedirectUrl:
+          description: "Where visitors to the bare hostname (`/`, `/auth`, `/auth/`)\
+            \ are redirected with a 302, or null when unset, in which case they see\
+            \ a neutral page."
+          type: string
+          nullable: true
+        rootRedirectAvailable:
+          description: Whether a root redirect can be set for this domain on this
+            cluster. False until the feature reaches the cluster.
+          type: boolean
+        changePasswordRedirectAvailable:
+          description: Whether a `/.well-known/change-password` redirect can be set
+            for this domain on this cluster (see the well-known resource). False until
+            the feature reaches the cluster.
+          type: boolean
     CustomerDomainValidation:
       description: DNS validation and TLS certificate status of a custom domain. The
         domain is only usable as a cluster's primary hostname once `certificateStatus`
@@ -2617,6 +3293,68 @@ components:
       - DISABLED
       - FAILED
       type: string
+    DeprovisionRequest:
+      type: object
+      properties:
+        confirm:
+          type: string
+    DnsRouting:
+      description: How a custom domain's public DNS reaches the cluster.
+      enum:
+      - CNAME_TO_TARGET
+      - CLOUDFLARE_PROXIED
+      - FLATTENED
+      - CNAME_ELSEWHERE
+      - OTHER_ADDRESSES
+      - NOT_RESOLVING
+      - AMBIGUOUS
+      type: string
+    DnsRoutingCheck:
+      description: The DNS routing of a cluster's custom domains.
+      type: object
+      properties:
+        debounced:
+          description: "True when the cluster was checked moments ago, so this is\
+            \ the stored state and no resolver was asked."
+          type: boolean
+        domains:
+          type: array
+          items:
+            $ref: "#/components/schemas/DomainDnsRouting"
+    DomainDnsRouting:
+      description: How a custom domain's public DNS reaches its cluster.
+      type: object
+      properties:
+        id:
+          description: ID of the custom domain.
+          type: string
+        domain:
+          description: The custom hostname.
+          type: string
+        routing:
+          description: "The last successful classification, or null if none has succeeded\
+            \ yet."
+          type: string
+          allOf:
+          - $ref: "#/components/schemas/DnsRouting"
+        detail:
+          description: "What the classification was based on: the CNAME chain and\
+            \ addresses."
+          type: string
+        checkedAt:
+          format: int64
+          description: "When the classification was last confirmed, as epoch milliseconds."
+          type: integer
+        error:
+          description: "Why this check could not classify the domain (no answer in\
+            \ time, SERVFAIL, the resolvers disagreeing). The stored classification\
+            \ is left as it was. Only in a check's response."
+          type: string
+        resolvers:
+          description: What each resolver saw. Only in a check's response.
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolverAnswer"
     DomainRecord:
       description: A single DNS record to create for domain validation.
       required:
@@ -3097,6 +3835,344 @@ components:
           description: S3 resource key the jar will land at. Pass this back to the
             matching `confirm` operation.
           type: string
+    ProtectedApp:
+      required:
+      - id
+      - deployment_id
+      - name
+      - public_hostname
+      - origin_url
+      - health_path
+      - status
+      - revision
+      - client_id
+      - callback_url
+      - policy
+      - assertion_enabled
+      - idle_timeout_seconds
+      - max_session_seconds
+      - origin_secret_header
+      - next_secret_pending
+      - created_at
+      - updated_at
+      type: object
+      properties:
+        id:
+          description: Application ID; also the `aud` of its identity assertions.
+          type: string
+        deployment_id:
+          description: Deployment (realm) whose users sign in.
+          type: string
+        name:
+          description: Display name.
+          type: string
+        public_hostname:
+          description: Hostname users visit. Cannot be changed.
+          type: string
+        origin_url:
+          description: HTTPS URL requests are forwarded to.
+          type: string
+        health_path:
+          description: Path on the origin that verification probes.
+          type: string
+        status:
+          description: '`PENDING` until activated; `ACTIVE` serves traffic; `DISABLED`
+            refuses it immediately.'
+          enum:
+          - PENDING
+          - ACTIVE
+          - DISABLED
+          type: string
+        revision:
+          format: int64
+          description: Increments each time the configuration is published to the
+            Gateway.
+          type: integer
+        client_id:
+          description: OIDC client created for this application in the deployment's
+            realm.
+          type: string
+        issuer:
+          description: OIDC issuer of the deployment's realm.
+          type: string
+        callback_url:
+          description: "Redirect URI registered on the OIDC client, on the public\
+            \ hostname."
+          type: string
+        policy:
+          $ref: "#/components/schemas/ProtectedAppPolicy"
+        header_mappings:
+          description: "Header name to claim, sent to the origin on every request."
+          type: object
+          additionalProperties:
+            type: string
+        assertion_enabled:
+          description: Whether the signed identity assertion is sent.
+          type: boolean
+        assertion_claims:
+          description: Claims in the assertion besides `sub`.
+          type: array
+          items:
+            type: string
+        assertion_issuer:
+          description: '`iss` of identity assertions.'
+          type: string
+        jwks_url:
+          description: Public keys that verify identity assertions.
+          type: string
+        idle_timeout_seconds:
+          format: int32
+          description: Session idle timeout.
+          type: integer
+        max_session_seconds:
+          format: int32
+          description: Absolute session lifetime.
+          type: integer
+        post_logout_redirect_uri:
+          description: "Where users land after signing out, if not the Phase Two page."
+          type: string
+        origin_secret_header:
+          description: "Header that carries the origin secret: `X-Phasetwo-Origin-Secret`."
+          type: string
+        next_secret_pending:
+          description: A rotated secret has been issued and not yet promoted.
+          type: boolean
+        verification:
+          description: Latest verification of the current secret.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/ProtectedAppVerification"
+        next_verification:
+          description: Latest verification of the pending (rotated) secret.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/ProtectedAppVerification"
+        readiness:
+          description: Present on the single-app read; computed live.
+          type: object
+          allOf:
+          - $ref: "#/components/schemas/ProtectedAppReadiness"
+        created_at:
+          format: int64
+          description: Epoch milliseconds.
+          type: integer
+        updated_at:
+          format: int64
+          description: Epoch milliseconds.
+          type: integer
+    ProtectedAppHostname:
+      type: object
+      properties:
+        status:
+          description: "Cloudflare custom hostname status, or `UNCONFIGURED`/`NOT_FOUND`."
+          type: string
+        ssl_status:
+          description: Cloudflare certificate status.
+          type: string
+        dns_target:
+          description: CNAME target the public hostname must point at.
+          type: string
+        dns_ok:
+          type: boolean
+        validation_records:
+          description: DNS records Cloudflare needs before it issues a certificate.
+          type: array
+          items:
+            $ref: "#/components/schemas/DomainRecord"
+        error:
+          type: string
+    ProtectedAppPolicy:
+      type: object
+      properties:
+        default:
+          description: "`authenticated` (any signed-in user, the default) or `deny`\
+            \ (only paths a rule matches)."
+          enum:
+          - authenticated
+          - deny
+          type: string
+        rules:
+          description: "Every rule whose path prefix and methods match a request applies,\
+            \ and all of them must pass; deny wins. Prefixes match whole path segments,\
+            \ case-insensitively."
+          type: array
+          items:
+            $ref: "#/components/schemas/ProtectedAppPolicyRule"
+    ProtectedAppPolicyRule:
+      required:
+      - path_prefix
+      type: object
+      properties:
+        path_prefix:
+          description: "Path prefix, e.g. `/admin`."
+          type: string
+        methods:
+          description: Upper-case HTTP methods; all methods when omitted. GET covers
+            HEAD.
+          type: array
+          items:
+            type: string
+        effect:
+          description: "`require` (default): the conditions below must hold. `deny`:\
+            \ always refuse."
+          enum:
+          - require
+          - deny
+          type: string
+        realm_roles_any:
+          description: User must hold at least one of these realm roles.
+          type: array
+          items:
+            type: string
+        client_roles_any:
+          description: User must hold at least one of these roles on the app's client.
+          type: array
+          items:
+            type: string
+        groups_any:
+          description: User must be in at least one of these groups (full path).
+          type: array
+          items:
+            type: string
+        claims_equal:
+          description: "Claims that must equal these values, e.g. `email_verified:\
+            \ true`."
+          type: object
+          additionalProperties: {}
+    ProtectedAppProbe:
+      type: object
+      properties:
+        name:
+          enum:
+          - valid_secret
+          - no_secret
+          - wrong_secret
+          - forged_identity
+          type: string
+        status:
+          format: int32
+          description: "HTTP status, or absent when the request failed."
+          type: integer
+        error:
+          type: string
+        duration_ms:
+          format: int64
+          type: integer
+    ProtectedAppReadiness:
+      type: object
+      properties:
+        auth_configured:
+          description: The OIDC client exists and the realm's discovery matches its
+            issuer.
+          type: boolean
+        origin_verified:
+          description: The current secret's latest verification is VERIFIED.
+          type: boolean
+        hostname_ready:
+          description: "Cloudflare hostname and certificate are active, and DNS points\
+            \ to us."
+          type: boolean
+        hostname:
+          $ref: "#/components/schemas/ProtectedAppHostname"
+    ProtectedAppRequest:
+      required:
+      - name
+      - public_hostname
+      - origin_url
+      type: object
+      properties:
+        name:
+          description: Display name.
+          type: string
+        public_hostname:
+          description: "Hostname users visit, e.g. `admin.example.com`. Set on create;\
+            \ cannot be changed."
+          type: string
+        origin_url:
+          description: "HTTPS URL requests are forwarded to, with an optional base\
+            \ path. Must be a different hostname from `public_hostname` and publicly\
+            \ resolvable."
+          type: string
+        health_path:
+          description: A side-effect-free path on the origin that returns 2xx when
+            the secret is present; used for verification. Defaults to `/`.
+          type: string
+        policy:
+          $ref: "#/components/schemas/ProtectedAppPolicy"
+        header_mappings:
+          description: "Header name (`X-Phasetwo-Auth-*`) to claim: one of `sub`,\
+            \ `email`, `email_verified`, `preferred_username`, `name`, `given_name`,\
+            \ `family_name`, `groups`, `realm_roles`, `client_roles`."
+          type: object
+          additionalProperties:
+            type: string
+        assertion_enabled:
+          description: Send a signed `X-Phasetwo-Auth-Assertion` JWT on every request.
+          type: boolean
+        assertion_claims:
+          description: Claims to include in the assertion besides `sub`.
+          type: array
+          items:
+            type: string
+        idle_timeout_seconds:
+          format: int32
+          description: Session idle timeout; default 1800.
+          type: integer
+        max_session_seconds:
+          format: int32
+          description: Absolute session lifetime; default 28800.
+          type: integer
+        post_logout_redirect_uri:
+          description: HTTPS URL to land on after sign-out; defaults to a Phase Two
+            page.
+          type: string
+    ProtectedAppSecret:
+      required:
+      - app
+      - origin_secret
+      - header_name
+      type: object
+      properties:
+        app:
+          $ref: "#/components/schemas/ProtectedApp"
+        origin_secret:
+          description: Value of `X-Phasetwo-Origin-Secret` your ingress must require.
+            Shown once.
+          type: string
+        header_name:
+          type: string
+    ProtectedAppVerification:
+      required:
+      - result
+      type: object
+      properties:
+        result:
+          description: "`VERIFIED` only when the valid secret got a 2xx and every\
+            \ other probe an explicit 401/403. `FAILED` when the origin admitted a\
+            \ request without the secret. `INCONCLUSIVE` otherwise (404, redirect,\
+            \ error, timeout)."
+          enum:
+          - VERIFIED
+          - FAILED
+          - INCONCLUSIVE
+          type: string
+        reason:
+          type: string
+        secret:
+          description: Which secret was tested.
+          enum:
+          - current
+          - next
+          type: string
+        checked_at:
+          type: string
+        url:
+          description: The probed URL.
+          type: string
+        probes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProtectedAppProbe"
     RedirectLink:
       required:
       - link
@@ -3131,6 +4207,18 @@ components:
           type: string
         region:
           description: Provider-specific region code.
+          type: string
+    ResolverAnswer:
+      description: What one resolver saw.
+      type: object
+      properties:
+        resolver:
+          type: string
+        routing:
+          $ref: "#/components/schemas/DnsRouting"
+        detail:
+          type: string
+        error:
           type: string
     ResourceLimits:
       enum:
@@ -3170,6 +4258,32 @@ components:
           type: string
           allOf:
           - $ref: "#/components/schemas/BillingPeriod"
+    RootRedirect:
+      description: A custom domain's root redirect.
+      type: object
+      properties:
+        url:
+          description: "An https URL on the same registrable domain as the custom\
+            \ domain, or on the domain of another custom domain of the cluster. Null\
+            \ or empty clears the redirect."
+          type: string
+          nullable: true
+    RunningWorkflows:
+      description: "The workflows changing clusters' workspaces, and those waiting\
+        \ to."
+      required:
+      - clusters
+      type: object
+      properties:
+        temporal_url:
+          description: "The Temporal UI's workflow list, where finished workflows\
+            \ can be browsed. Absent when Temporal isn't configured."
+          type: string
+        clusters:
+          description: "Only the clusters with a workflow holding or waiting, by name."
+          type: array
+          items:
+            $ref: "#/components/schemas/ClusterRunningWorkflows"
     Secret:
       required:
       - id
@@ -3265,46 +4379,6 @@ components:
           description: "Amount remaining on the open invoice, in the smallest currency\
             \ unit (e.g. cents). Present only when `open_invoice` is true."
           type: integer
-    SystemInfoRepresentation:
-      type: object
-      properties:
-        version:
-          type: string
-        serverTime:
-          type: string
-        uptime:
-          type: string
-        uptimeMillis:
-          format: int64
-          type: integer
-        javaVersion:
-          type: string
-        javaVendor:
-          type: string
-        javaVm:
-          type: string
-        javaVmVersion:
-          type: string
-        javaRuntime:
-          type: string
-        javaHome:
-          type: string
-        osName:
-          type: string
-        osArchitecture:
-          type: string
-        osVersion:
-          type: string
-        fileEncoding:
-          type: string
-        userName:
-          type: string
-        userDir:
-          type: string
-        userTimezone:
-          type: string
-        userLocale:
-          type: string
     TelemetryExport:
       type: object
       properties:
@@ -3324,12 +4398,6 @@ components:
           type: string
         tokenSet:
           type: boolean
-        lastDeliveryAt:
-          format: date
-          type: string
-          example: 2022-03-10
-        lastError:
-          type: string
     Tier:
       enum:
       - starter
@@ -3392,6 +4460,8 @@ components:
             $ref: "#/components/schemas/WellKnownFile"
         change_password_url:
           type: string
+        change_password_available:
+          type: boolean
         propagation_seconds:
           format: int32
           type: integer
