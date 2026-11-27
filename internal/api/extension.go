@@ -171,7 +171,7 @@ func (c *Client) UploadVersion(
 	if err != nil {
 		return nil, err
 	}
-	if err := c.putObject(ctx, presigned, jar); err != nil {
+	if err := c.putObject(ctx, presigned, jar, JarContentType); err != nil {
 		return nil, err
 	}
 	return c.confirmVersion(ctx, clusterID, extensionID, version.Id, presigned.ResourceKey)
@@ -197,7 +197,7 @@ func (c *Client) UploadStandalone(
 	}
 	presigned := resp.JSON200
 
-	if err := c.putObject(ctx, presigned, payload); err != nil {
+	if err := c.putObject(ctx, presigned, payload, ""); err != nil {
 		return nil, err
 	}
 
@@ -274,12 +274,18 @@ func (c *Client) DeleteExtensionVersion(ctx context.Context, clusterID, extensio
 	return check(op, resp.StatusCode(), resp.Body)
 }
 
-// putObject uploads bytes to a presigned S3 target.
+// JarContentType is the Content-Type a jar must be stored with. The confirm call checks the S3
+// object's stored Content-Type against exactly this value, and S3 stores whatever the PUT sent
+// (binary/octet-stream when nothing is sent), so versioned uploads must set it. Standalone
+// uploads (password denylists) are text and are not checked.
+const JarContentType = "application/java-archive"
+
+// putObject uploads bytes to a presigned S3 target, with contentType if it is not empty.
 //
 // This goes straight to S3, not to the API, so it deliberately uses a bare HTTP client with no
 // OAuth editor attached — presigned URLs carry their own signature and an Authorization header
 // makes S3 reject the request.
-func (c *Client) putObject(ctx context.Context, p *client.PresignedUrl, body []byte) error {
+func (c *Client) putObject(ctx context.Context, p *client.PresignedUrl, body []byte, contentType string) error {
 	method := p.Method
 	if method == "" {
 		method = http.MethodPut
@@ -289,6 +295,9 @@ func (c *Client) putObject(ctx context.Context, p *client.PresignedUrl, body []b
 		return fmt.Errorf("building upload request: %w", err)
 	}
 	req.ContentLength = int64(len(body))
+	if contentType != "" {
+		req.Header.Set("Content-Type", contentType)
+	}
 
 	hc := c.cfg.HTTPClient
 	if hc == nil {
