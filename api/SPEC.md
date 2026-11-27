@@ -7,8 +7,8 @@ published anywhere, so it is vendored here and pinned.
 | | |
 |---|---|
 | Source repo | `p2-inc/phasetwo-keycloak` |
-| Pinned commit | `c52ee8af22e5bd6049c305fb92d84a535fcf1819` |
-| Branch at pin | `dev` |
+| Pinned commit | `6542881804eb1021153470a83917f9575b9355ad` |
+| Branch at pin | `instant-protect` (p2-inc/phasetwo-keycloak#947); re-pin to `dev` once it merges |
 
 Rebuilding from that commit reproduces this file byte for byte.
 

@@ -13,9 +13,30 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/oapi-codegen/nullable"
 	"github.com/oapi-codegen/runtime"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+// Defines values for AccountDeletionOutcome.
+const (
+	BLOCKED AccountDeletionOutcome = "BLOCKED"
+	DELETE  AccountDeletionOutcome = "DELETE"
+	LEAVE   AccountDeletionOutcome = "LEAVE"
+)
+
+// Valid indicates whether the value is a known member of the AccountDeletionOutcome enum.
+func (e AccountDeletionOutcome) Valid() bool {
+	switch e {
+	case BLOCKED:
+		return true
+	case DELETE:
+		return true
+	case LEAVE:
+		return true
+	default:
+		return false
+	}
+}
 
 // Defines values for BillingPeriod.
 const (
@@ -110,6 +131,24 @@ func (e ClusterState) Valid() bool {
 	}
 }
 
+// Defines values for ClusterWorkspaceStatusWorkspace.
+const (
+	APPSDEPLOY ClusterWorkspaceStatusWorkspace = "APPS_DEPLOY"
+	APPSINFRA  ClusterWorkspaceStatusWorkspace = "APPS_INFRA"
+)
+
+// Valid indicates whether the value is a known member of the ClusterWorkspaceStatusWorkspace enum.
+func (e ClusterWorkspaceStatusWorkspace) Valid() bool {
+	switch e {
+	case APPSDEPLOY:
+		return true
+	case APPSINFRA:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for DeploymentState.
 const (
 	DeploymentStateACTIVE   DeploymentState = "ACTIVE"
@@ -128,6 +167,39 @@ func (e DeploymentState) Valid() bool {
 	case DeploymentStateFAILED:
 		return true
 	case DeploymentStatePENDING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DnsRouting.
+const (
+	AMBIGUOUS         DnsRouting = "AMBIGUOUS"
+	CLOUDFLAREPROXIED DnsRouting = "CLOUDFLARE_PROXIED"
+	CNAMEELSEWHERE    DnsRouting = "CNAME_ELSEWHERE"
+	CNAMETOTARGET     DnsRouting = "CNAME_TO_TARGET"
+	FLATTENED         DnsRouting = "FLATTENED"
+	NOTRESOLVING      DnsRouting = "NOT_RESOLVING"
+	OTHERADDRESSES    DnsRouting = "OTHER_ADDRESSES"
+)
+
+// Valid indicates whether the value is a known member of the DnsRouting enum.
+func (e DnsRouting) Valid() bool {
+	switch e {
+	case AMBIGUOUS:
+		return true
+	case CLOUDFLAREPROXIED:
+		return true
+	case CNAMEELSEWHERE:
+		return true
+	case CNAMETOTARGET:
+		return true
+	case FLATTENED:
+		return true
+	case NOTRESOLVING:
+		return true
+	case OTHERADDRESSES:
 		return true
 	default:
 		return false
@@ -245,6 +317,126 @@ func (e EnvironmentVariableType) Valid() bool {
 	}
 }
 
+// Defines values for ProtectedAppStatus.
+const (
+	ProtectedAppStatusACTIVE   ProtectedAppStatus = "ACTIVE"
+	ProtectedAppStatusDISABLED ProtectedAppStatus = "DISABLED"
+	ProtectedAppStatusPENDING  ProtectedAppStatus = "PENDING"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppStatus enum.
+func (e ProtectedAppStatus) Valid() bool {
+	switch e {
+	case ProtectedAppStatusACTIVE:
+		return true
+	case ProtectedAppStatusDISABLED:
+		return true
+	case ProtectedAppStatusPENDING:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProtectedAppPolicyDefault.
+const (
+	ProtectedAppPolicyDefaultAuthenticated ProtectedAppPolicyDefault = "authenticated"
+	ProtectedAppPolicyDefaultDeny          ProtectedAppPolicyDefault = "deny"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppPolicyDefault enum.
+func (e ProtectedAppPolicyDefault) Valid() bool {
+	switch e {
+	case ProtectedAppPolicyDefaultAuthenticated:
+		return true
+	case ProtectedAppPolicyDefaultDeny:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProtectedAppPolicyRuleEffect.
+const (
+	ProtectedAppPolicyRuleEffectDeny    ProtectedAppPolicyRuleEffect = "deny"
+	ProtectedAppPolicyRuleEffectRequire ProtectedAppPolicyRuleEffect = "require"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppPolicyRuleEffect enum.
+func (e ProtectedAppPolicyRuleEffect) Valid() bool {
+	switch e {
+	case ProtectedAppPolicyRuleEffectDeny:
+		return true
+	case ProtectedAppPolicyRuleEffectRequire:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProtectedAppProbeName.
+const (
+	ForgedIdentity ProtectedAppProbeName = "forged_identity"
+	NoSecret       ProtectedAppProbeName = "no_secret"
+	ValidSecret    ProtectedAppProbeName = "valid_secret"
+	WrongSecret    ProtectedAppProbeName = "wrong_secret"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppProbeName enum.
+func (e ProtectedAppProbeName) Valid() bool {
+	switch e {
+	case ForgedIdentity:
+		return true
+	case NoSecret:
+		return true
+	case ValidSecret:
+		return true
+	case WrongSecret:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProtectedAppVerificationResult.
+const (
+	ProtectedAppVerificationResultFAILED       ProtectedAppVerificationResult = "FAILED"
+	ProtectedAppVerificationResultINCONCLUSIVE ProtectedAppVerificationResult = "INCONCLUSIVE"
+	ProtectedAppVerificationResultVERIFIED     ProtectedAppVerificationResult = "VERIFIED"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppVerificationResult enum.
+func (e ProtectedAppVerificationResult) Valid() bool {
+	switch e {
+	case ProtectedAppVerificationResultFAILED:
+		return true
+	case ProtectedAppVerificationResultINCONCLUSIVE:
+		return true
+	case ProtectedAppVerificationResultVERIFIED:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProtectedAppVerificationSecret.
+const (
+	Current ProtectedAppVerificationSecret = "current"
+	Next    ProtectedAppVerificationSecret = "next"
+)
+
+// Valid indicates whether the value is a known member of the ProtectedAppVerificationSecret enum.
+func (e ProtectedAppVerificationSecret) Valid() bool {
+	switch e {
+	case Current:
+		return true
+	case Next:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ResourceLimits.
 const (
 	Custom   ResourceLimits = "custom"
@@ -308,6 +500,45 @@ func (e Tier) Valid() bool {
 	}
 }
 
+// AccountDeletionOrganization One of the user's organizations, and what deleting the account does to it.
+type AccountDeletionOrganization struct {
+	// Blockers Why the account can't be deleted yet, when the outcome is BLOCKED. Human-readable.
+	Blockers *[]string `json:"blockers,omitempty"`
+
+	// DisplayName Display name, when set.
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Id Organization id.
+	Id string `json:"id"`
+
+	// Name Organization name.
+	Name string `json:"name"`
+
+	// Outcome What deleting the account does to one of the user's organizations.
+	Outcome AccountDeletionOutcome `json:"outcome"`
+
+	// SuccessorEmail For LEAVE: the member who keeps managing the organization, and who becomes its billing email if the user was.
+	SuccessorEmail *string `json:"successorEmail,omitempty"`
+}
+
+// AccountDeletionOutcome What deleting the account does to one of the user's organizations.
+type AccountDeletionOutcome string
+
+// AccountDeletionPreview What deleting a user's account would do, and whether it can be done now.
+type AccountDeletionPreview struct {
+	// Confirmation The exact string the deletion request's `confirm` must equal.
+	Confirmation string `json:"confirmation"`
+
+	// Deletable True when nothing blocks the deletion. False when any organization is BLOCKED.
+	Deletable     bool                          `json:"deletable"`
+	Email         *string                       `json:"email,omitempty"`
+	Organizations []AccountDeletionOrganization `json:"organizations"`
+
+	// UserId User id.
+	UserId   string `json:"userId"`
+	Username string `json:"username"`
+}
+
 // AdminBlockExtensionVersionRequest defines model for AdminBlockExtensionVersionRequest.
 type AdminBlockExtensionVersionRequest struct {
 	// Blocked True to block this version from being deployed to any cluster, false to lift an existing block.
@@ -352,8 +583,17 @@ type CertificateStatusMapping string
 
 // Cluster defines model for Cluster.
 type Cluster struct {
+	// BillingRequiredAt When a `BILLING_REQUIRED` cluster was suspended (ISO-8601). Absent in other states.
+	BillingRequiredAt *string `json:"billing_required_at,omitempty"`
+
+	// BillingRequiredReason Why a `BILLING_REQUIRED` cluster was suspended: `payment-failed`, `subscription-deleted`, `trial-conversion-failed` or `trial-ended`. Absent in other states.
+	BillingRequiredReason *string `json:"billing_required_reason,omitempty"`
+
 	// CreatedAt When the cluster was created, as epoch milliseconds.
 	CreatedAt int64 `json:"created_at"`
+
+	// DataPurgeAt When a removed cluster's retained data will be permanently deleted (ISO-8601). Absent when the data is not retained after removal.
+	DataPurgeAt *string `json:"data_purge_at,omitempty"`
 
 	// Domain Custom domain recorded at provision time, when one was given. This is not the live hostname — use `cluster.host.update` to change which domain the cluster serves.
 	Domain *string `json:"domain,omitempty"`
@@ -388,11 +628,20 @@ type Cluster struct {
 	// Status Lifecycle state. A cluster is only usable in `ACTIVE`; `PENDING_DELETION` and `ARCHIVED` are terminal.
 	Status ClusterState `json:"status"`
 
+	// TeardownAt When a `BILLING_REQUIRED` cluster will be removed unless billing is resolved (ISO-8601). Absent when no removal is scheduled.
+	TeardownAt *string `json:"teardown_at,omitempty"`
+
+	// TelemetryExportAvailable Whether this cluster may configure telemetry export: an Enterprise entitlement, or any tier when the cluster is exempt from resource limits. Computed server-side so clients do not re-derive the rule from `tier` and `resource_limits`.
+	TelemetryExportAvailable bool `json:"telemetry_export_available"`
+
 	// Tier Subscription tier, which determines the cluster's resource limits.
 	Tier Tier `json:"tier"`
 
 	// Variant `DEDICATED` when the cluster has an owning organization, `SHARED` otherwise.
 	Variant *string `json:"variant,omitempty"`
+
+	// WafRateLimit Requests one client IP may send to the cluster in a trailing 5-minute window before further requests are rejected with HTTP 429. Set by the tier.
+	WafRateLimit *int32 `json:"waf_rate_limit,omitempty"`
 }
 
 // ClusterCreationResult defines model for ClusterCreationResult.
@@ -425,8 +674,92 @@ type ClusterDomain struct {
 	Host string `json:"host"`
 }
 
+// ClusterNamePrefix defines model for ClusterNamePrefix.
+type ClusterNamePrefix struct {
+	// Prefix The prefix new cluster names in this environment should start with. Empty when the environment has none.
+	Prefix string `json:"prefix"`
+}
+
+// ClusterRunningWorkflows Who holds each of a cluster's workspaces, and who is waiting.
+type ClusterRunningWorkflows struct {
+	ClusterId   string `json:"cluster_id"`
+	ClusterName string `json:"cluster_name"`
+
+	// OrganizationId The organization that owns the cluster. Absent for a shared cluster.
+	OrganizationId *string `json:"organization_id,omitempty"`
+
+	// OrganizationName Absent for a shared cluster.
+	OrganizationName *string `json:"organization_name,omitempty"`
+
+	// Workspaces Both workspaces, apps-infra first, even a free one.
+	Workspaces []ClusterWorkspaceStatus `json:"workspaces"`
+}
+
 // ClusterState Lifecycle state of a dedicated cluster.
 type ClusterState string
+
+// ClusterSystemInfoRepresentation defines model for ClusterSystemInfoRepresentation.
+type ClusterSystemInfoRepresentation struct {
+	// BuildTag This cluster's Phase Two release build tag (e.g. `26.6.6.1787589931`), or `untagged` for a pre-phasetwo-containers#176 image. Null if the cluster's serverinfo couldn't be fetched.
+	BuildTag       *string `json:"buildTag,omitempty"`
+	FileEncoding   *string `json:"fileEncoding,omitempty"`
+	JavaHome       *string `json:"javaHome,omitempty"`
+	JavaRuntime    *string `json:"javaRuntime,omitempty"`
+	JavaVendor     *string `json:"javaVendor,omitempty"`
+	JavaVersion    *string `json:"javaVersion,omitempty"`
+	JavaVm         *string `json:"javaVm,omitempty"`
+	JavaVmVersion  *string `json:"javaVmVersion,omitempty"`
+	OsArchitecture *string `json:"osArchitecture,omitempty"`
+	OsName         *string `json:"osName,omitempty"`
+	OsVersion      *string `json:"osVersion,omitempty"`
+	ServerTime     *string `json:"serverTime,omitempty"`
+	Uptime         *string `json:"uptime,omitempty"`
+	UptimeMillis   *int64  `json:"uptimeMillis,omitempty"`
+	UserDir        *string `json:"userDir,omitempty"`
+	UserLocale     *string `json:"userLocale,omitempty"`
+	UserName       *string `json:"userName,omitempty"`
+	UserTimezone   *string `json:"userTimezone,omitempty"`
+	Version        *string `json:"version,omitempty"`
+}
+
+// ClusterWorkspaceEntry A workflow holding or waiting for a workspace.
+type ClusterWorkspaceEntry struct {
+	// GrantedAt When it was given the workspace (ISO-8601). Absent while waiting.
+	GrantedAt *string `json:"granted_at,omitempty"`
+
+	// QueuedAt When the workflow got in line (ISO-8601).
+	QueuedAt string `json:"queued_at"`
+
+	// RunId The run that holds the workspace or last checked its place. Absent until the workflow first checks.
+	RunId *string `json:"run_id,omitempty"`
+
+	// TemporalUrl The run on the Temporal UI, or the workflow without a run ID. Absent when Temporal isn't configured.
+	TemporalUrl *string `json:"temporal_url,omitempty"`
+
+	// TrackingIssueUrl The workflow's tracking issue on GitHub. Absent until the workflow opens it, or when the workflow didn't answer in time.
+	TrackingIssueUrl *string `json:"tracking_issue_url,omitempty"`
+
+	// WorkflowId The Temporal workflow ID, e.g. `upgrade-cluster-acme`.
+	WorkflowId string `json:"workflow_id"`
+
+	// WorkflowType The Temporal workflow type, e.g. `UpgradeClusterWorkflow`.
+	WorkflowType string `json:"workflow_type"`
+}
+
+// ClusterWorkspaceStatus Who holds one of a cluster's workspaces, and who is waiting for it.
+type ClusterWorkspaceStatus struct {
+	// Holder The workflow changing the workspace. Absent when nobody holds it.
+	Holder *ClusterWorkspaceEntry `json:"holder,omitempty"`
+
+	// Queue The workflows waiting for the workspace, first in line first. A workflow that needs both workspaces is in both queues, and one queued behind it waits for it even when its own workspace is free.
+	Queue []ClusterWorkspaceEntry `json:"queue"`
+
+	// Workspace `APPS_INFRA` (the cluster's Terraform: DNS, certificates, CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag, replicas, env vars, extensions).
+	Workspace ClusterWorkspaceStatusWorkspace `json:"workspace"`
+}
+
+// ClusterWorkspaceStatusWorkspace `APPS_INFRA` (the cluster's Terraform: DNS, certificates, CloudFront, WAF IP lists) or `APPS_DEPLOY` (its Helm values: image tag, replicas, env vars, extensions).
+type ClusterWorkspaceStatusWorkspace string
 
 // ConsoleLink defines model for ConsoleLink.
 type ConsoleLink struct {
@@ -442,6 +775,9 @@ type ConsoleLink struct {
 
 // CustomerDomain A custom hostname configured for a dedicated cluster.
 type CustomerDomain struct {
+	// ChangePasswordRedirectAvailable Whether a `/.well-known/change-password` redirect can be set for this domain on this cluster (see the well-known resource). False until the feature reaches the cluster.
+	ChangePasswordRedirectAvailable *bool `json:"changePasswordRedirectAvailable,omitempty"`
+
 	// CreatedAt When the domain was added, as epoch milliseconds.
 	CreatedAt *int64 `json:"createdAt,omitempty"`
 
@@ -456,6 +792,12 @@ type CustomerDomain struct {
 
 	// OrganizationId ID of the organization that owns the cluster.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// RootRedirectAvailable Whether a root redirect can be set for this domain on this cluster. False until the feature reaches the cluster.
+	RootRedirectAvailable *bool `json:"rootRedirectAvailable,omitempty"`
+
+	// RootRedirectUrl Where visitors to the bare hostname (`/`, `/auth`, `/auth/`) are redirected with a 302, or null when unset, in which case they see a neutral page.
+	RootRedirectUrl nullable.Nullable[string] `json:"rootRedirectUrl,omitempty"`
 
 	// Type What the hostname is used for.
 	Type DomainType `json:"type"`
@@ -575,6 +917,45 @@ type DeploymentCredentialRequest struct {
 
 // DeploymentState Lifecycle state of a deployment (realm).
 type DeploymentState string
+
+// DeprovisionRequest defines model for DeprovisionRequest.
+type DeprovisionRequest struct {
+	Confirm *string `json:"confirm,omitempty"`
+}
+
+// DnsRouting How a custom domain's public DNS reaches the cluster.
+type DnsRouting string
+
+// DnsRoutingCheck The DNS routing of a cluster's custom domains.
+type DnsRoutingCheck struct {
+	// Debounced True when the cluster was checked moments ago, so this is the stored state and no resolver was asked.
+	Debounced *bool               `json:"debounced,omitempty"`
+	Domains   *[]DomainDnsRouting `json:"domains,omitempty"`
+}
+
+// DomainDnsRouting How a custom domain's public DNS reaches its cluster.
+type DomainDnsRouting struct {
+	// CheckedAt When the classification was last confirmed, as epoch milliseconds.
+	CheckedAt *int64 `json:"checkedAt,omitempty"`
+
+	// Detail What the classification was based on: the CNAME chain and addresses.
+	Detail *string `json:"detail,omitempty"`
+
+	// Domain The custom hostname.
+	Domain *string `json:"domain,omitempty"`
+
+	// Error Why this check could not classify the domain (no answer in time, SERVFAIL, the resolvers disagreeing). The stored classification is left as it was. Only in a check's response.
+	Error *string `json:"error,omitempty"`
+
+	// Id ID of the custom domain.
+	Id *string `json:"id,omitempty"`
+
+	// Resolvers What each resolver saw. Only in a check's response.
+	Resolvers *[]ResolverAnswer `json:"resolvers,omitempty"`
+
+	// Routing The last successful classification, or null if none has succeeded yet.
+	Routing *DnsRouting `json:"routing,omitempty"`
+}
 
 // DomainRecord A single DNS record to create for domain validation.
 type DomainRecord struct {
@@ -885,6 +1266,239 @@ type PresignedUrl struct {
 	Url string `json:"url"`
 }
 
+// ProtectedApp defines model for ProtectedApp.
+type ProtectedApp struct {
+	// AssertionClaims Claims in the assertion besides `sub`.
+	AssertionClaims *[]string `json:"assertion_claims,omitempty"`
+
+	// AssertionEnabled Whether the signed identity assertion is sent.
+	AssertionEnabled bool `json:"assertion_enabled"`
+
+	// AssertionIssuer `iss` of identity assertions.
+	AssertionIssuer *string `json:"assertion_issuer,omitempty"`
+
+	// CallbackUrl Redirect URI registered on the OIDC client, on the public hostname.
+	CallbackUrl string `json:"callback_url"`
+
+	// ClientId OIDC client created for this application in the deployment's realm.
+	ClientId string `json:"client_id"`
+
+	// CreatedAt Epoch milliseconds.
+	CreatedAt int64 `json:"created_at"`
+
+	// DeploymentId Deployment (realm) whose users sign in.
+	DeploymentId string `json:"deployment_id"`
+
+	// HeaderMappings Header name to claim, sent to the origin on every request.
+	HeaderMappings *map[string]string `json:"header_mappings,omitempty"`
+
+	// HealthPath Path on the origin that verification probes.
+	HealthPath string `json:"health_path"`
+
+	// Id Application ID; also the `aud` of its identity assertions.
+	Id string `json:"id"`
+
+	// IdleTimeoutSeconds Session idle timeout.
+	IdleTimeoutSeconds int32 `json:"idle_timeout_seconds"`
+
+	// Issuer OIDC issuer of the deployment's realm.
+	Issuer *string `json:"issuer,omitempty"`
+
+	// JwksUrl Public keys that verify identity assertions.
+	JwksUrl *string `json:"jwks_url,omitempty"`
+
+	// MaxSessionSeconds Absolute session lifetime.
+	MaxSessionSeconds int32 `json:"max_session_seconds"`
+
+	// Name Display name.
+	Name string `json:"name"`
+
+	// NextSecretPending A rotated secret has been issued and not yet promoted.
+	NextSecretPending bool `json:"next_secret_pending"`
+
+	// NextVerification Latest verification of the pending (rotated) secret.
+	NextVerification *ProtectedAppVerification `json:"next_verification,omitempty"`
+
+	// OriginSecretHeader Header that carries the origin secret: `X-Phasetwo-Origin-Secret`.
+	OriginSecretHeader string `json:"origin_secret_header"`
+
+	// OriginUrl HTTPS URL requests are forwarded to.
+	OriginUrl string             `json:"origin_url"`
+	Policy    ProtectedAppPolicy `json:"policy"`
+
+	// PostLogoutRedirectUri Where users land after signing out, if not the Phase Two page.
+	PostLogoutRedirectUri *string `json:"post_logout_redirect_uri,omitempty"`
+
+	// PublicHostname Hostname users visit. Cannot be changed.
+	PublicHostname string `json:"public_hostname"`
+
+	// Readiness Present on the single-app read; computed live.
+	Readiness *ProtectedAppReadiness `json:"readiness,omitempty"`
+
+	// Revision Increments each time the configuration is published to the Gateway.
+	Revision int64 `json:"revision"`
+
+	// Status `PENDING` until activated; `ACTIVE` serves traffic; `DISABLED` refuses it immediately.
+	Status ProtectedAppStatus `json:"status"`
+
+	// UpdatedAt Epoch milliseconds.
+	UpdatedAt int64 `json:"updated_at"`
+
+	// Verification Latest verification of the current secret.
+	Verification *ProtectedAppVerification `json:"verification,omitempty"`
+}
+
+// ProtectedAppStatus `PENDING` until activated; `ACTIVE` serves traffic; `DISABLED` refuses it immediately.
+type ProtectedAppStatus string
+
+// ProtectedAppHostname defines model for ProtectedAppHostname.
+type ProtectedAppHostname struct {
+	DnsOk *bool `json:"dns_ok,omitempty"`
+
+	// DnsTarget CNAME target the public hostname must point at.
+	DnsTarget *string `json:"dns_target,omitempty"`
+	Error     *string `json:"error,omitempty"`
+
+	// SslStatus Cloudflare certificate status.
+	SslStatus *string `json:"ssl_status,omitempty"`
+
+	// Status Cloudflare custom hostname status, or `UNCONFIGURED`/`NOT_FOUND`.
+	Status *string `json:"status,omitempty"`
+
+	// ValidationRecords DNS records Cloudflare needs before it issues a certificate.
+	ValidationRecords *[]DomainRecord `json:"validation_records,omitempty"`
+}
+
+// ProtectedAppPolicy defines model for ProtectedAppPolicy.
+type ProtectedAppPolicy struct {
+	// Default `authenticated` (any signed-in user, the default) or `deny` (only paths a rule matches).
+	Default *ProtectedAppPolicyDefault `json:"default,omitempty"`
+
+	// Rules Every rule whose path prefix and methods match a request applies, and all of them must pass; deny wins. Prefixes match whole path segments, case-insensitively.
+	Rules *[]ProtectedAppPolicyRule `json:"rules,omitempty"`
+}
+
+// ProtectedAppPolicyDefault `authenticated` (any signed-in user, the default) or `deny` (only paths a rule matches).
+type ProtectedAppPolicyDefault string
+
+// ProtectedAppPolicyRule defines model for ProtectedAppPolicyRule.
+type ProtectedAppPolicyRule struct {
+	// ClaimsEqual Claims that must equal these values, e.g. `email_verified: true`.
+	ClaimsEqual *map[string]interface{} `json:"claims_equal,omitempty"`
+
+	// ClientRolesAny User must hold at least one of these roles on the app's client.
+	ClientRolesAny *[]string `json:"client_roles_any,omitempty"`
+
+	// Effect `require` (default): the conditions below must hold. `deny`: always refuse.
+	Effect *ProtectedAppPolicyRuleEffect `json:"effect,omitempty"`
+
+	// GroupsAny User must be in at least one of these groups (full path).
+	GroupsAny *[]string `json:"groups_any,omitempty"`
+
+	// Methods Upper-case HTTP methods; all methods when omitted. GET covers HEAD.
+	Methods *[]string `json:"methods,omitempty"`
+
+	// PathPrefix Path prefix, e.g. `/admin`.
+	PathPrefix string `json:"path_prefix"`
+
+	// RealmRolesAny User must hold at least one of these realm roles.
+	RealmRolesAny *[]string `json:"realm_roles_any,omitempty"`
+}
+
+// ProtectedAppPolicyRuleEffect `require` (default): the conditions below must hold. `deny`: always refuse.
+type ProtectedAppPolicyRuleEffect string
+
+// ProtectedAppProbe defines model for ProtectedAppProbe.
+type ProtectedAppProbe struct {
+	DurationMs *int64                 `json:"duration_ms,omitempty"`
+	Error      *string                `json:"error,omitempty"`
+	Name       *ProtectedAppProbeName `json:"name,omitempty"`
+
+	// Status HTTP status, or absent when the request failed.
+	Status *int32 `json:"status,omitempty"`
+}
+
+// ProtectedAppProbeName defines model for ProtectedAppProbe.Name.
+type ProtectedAppProbeName string
+
+// ProtectedAppReadiness defines model for ProtectedAppReadiness.
+type ProtectedAppReadiness struct {
+	// AuthConfigured The OIDC client exists and the realm's discovery matches its issuer.
+	AuthConfigured *bool                 `json:"auth_configured,omitempty"`
+	Hostname       *ProtectedAppHostname `json:"hostname,omitempty"`
+
+	// HostnameReady Cloudflare hostname and certificate are active, and DNS points to us.
+	HostnameReady *bool `json:"hostname_ready,omitempty"`
+
+	// OriginVerified The current secret's latest verification is VERIFIED.
+	OriginVerified *bool `json:"origin_verified,omitempty"`
+}
+
+// ProtectedAppRequest defines model for ProtectedAppRequest.
+type ProtectedAppRequest struct {
+	// AssertionClaims Claims to include in the assertion besides `sub`.
+	AssertionClaims *[]string `json:"assertion_claims,omitempty"`
+
+	// AssertionEnabled Send a signed `X-Phasetwo-Auth-Assertion` JWT on every request.
+	AssertionEnabled *bool `json:"assertion_enabled,omitempty"`
+
+	// HeaderMappings Header name (`X-Phasetwo-Auth-*`) to claim: one of `sub`, `email`, `email_verified`, `preferred_username`, `name`, `given_name`, `family_name`, `groups`, `realm_roles`, `client_roles`.
+	HeaderMappings *map[string]string `json:"header_mappings,omitempty"`
+
+	// HealthPath A side-effect-free path on the origin that returns 2xx when the secret is present; used for verification. Defaults to `/`.
+	HealthPath *string `json:"health_path,omitempty"`
+
+	// IdleTimeoutSeconds Session idle timeout; default 1800.
+	IdleTimeoutSeconds *int32 `json:"idle_timeout_seconds,omitempty"`
+
+	// MaxSessionSeconds Absolute session lifetime; default 28800.
+	MaxSessionSeconds *int32 `json:"max_session_seconds,omitempty"`
+
+	// Name Display name.
+	Name string `json:"name"`
+
+	// OriginUrl HTTPS URL requests are forwarded to, with an optional base path. Must be a different hostname from `public_hostname` and publicly resolvable.
+	OriginUrl string              `json:"origin_url"`
+	Policy    *ProtectedAppPolicy `json:"policy,omitempty"`
+
+	// PostLogoutRedirectUri HTTPS URL to land on after sign-out; defaults to a Phase Two page.
+	PostLogoutRedirectUri *string `json:"post_logout_redirect_uri,omitempty"`
+
+	// PublicHostname Hostname users visit, e.g. `admin.example.com`. Set on create; cannot be changed.
+	PublicHostname string `json:"public_hostname"`
+}
+
+// ProtectedAppSecret defines model for ProtectedAppSecret.
+type ProtectedAppSecret struct {
+	App        ProtectedApp `json:"app"`
+	HeaderName string       `json:"header_name"`
+
+	// OriginSecret Value of `X-Phasetwo-Origin-Secret` your ingress must require. Shown once.
+	OriginSecret string `json:"origin_secret"`
+}
+
+// ProtectedAppVerification defines model for ProtectedAppVerification.
+type ProtectedAppVerification struct {
+	CheckedAt *string              `json:"checked_at,omitempty"`
+	Probes    *[]ProtectedAppProbe `json:"probes,omitempty"`
+	Reason    *string              `json:"reason,omitempty"`
+
+	// Result `VERIFIED` only when the valid secret got a 2xx and every other probe an explicit 401/403. `FAILED` when the origin admitted a request without the secret. `INCONCLUSIVE` otherwise (404, redirect, error, timeout).
+	Result ProtectedAppVerificationResult `json:"result"`
+
+	// Secret Which secret was tested.
+	Secret *ProtectedAppVerificationSecret `json:"secret,omitempty"`
+
+	// Url The probed URL.
+	Url *string `json:"url,omitempty"`
+}
+
+// ProtectedAppVerificationResult `VERIFIED` only when the valid secret got a 2xx and every other probe an explicit 401/403. `FAILED` when the origin admitted a request without the secret. `INCONCLUSIVE` otherwise (404, redirect, error, timeout).
+type ProtectedAppVerificationResult string
+
+// ProtectedAppVerificationSecret Which secret was tested.
+type ProtectedAppVerificationSecret string
+
 // RedirectLink defines model for RedirectLink.
 type RedirectLink struct {
 	// Link URL to redirect the browser to. Single-use and short-lived.
@@ -912,6 +1526,16 @@ type Region struct {
 	Region string `json:"region"`
 }
 
+// ResolverAnswer What one resolver saw.
+type ResolverAnswer struct {
+	Detail   *string `json:"detail,omitempty"`
+	Error    *string `json:"error,omitempty"`
+	Resolver *string `json:"resolver,omitempty"`
+
+	// Routing How a custom domain's public DNS reaches the cluster.
+	Routing *DnsRouting `json:"routing,omitempty"`
+}
+
 // ResourceLimits defines model for ResourceLimits.
 type ResourceLimits string
 
@@ -932,6 +1556,21 @@ type ResumeCheckoutRequest struct {
 	// PriceId Deprecated. Explicit Stripe price ID, overriding the price derived from the cluster's stored tier.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	PriceId *string `json:"price_id,omitempty"`
+}
+
+// RootRedirect A custom domain's root redirect.
+type RootRedirect struct {
+	// Url An https URL on the same registrable domain as the custom domain, or on the domain of another custom domain of the cluster. Null or empty clears the redirect.
+	Url nullable.Nullable[string] `json:"url,omitempty"`
+}
+
+// RunningWorkflows The workflows changing clusters' workspaces, and those waiting to.
+type RunningWorkflows struct {
+	// Clusters Only the clusters with a workflow holding or waiting, by name.
+	Clusters []ClusterRunningWorkflows `json:"clusters"`
+
+	// TemporalUrl The Temporal UI's workflow list, where finished workflows can be browsed. Absent when Temporal isn't configured.
+	TemporalUrl *string `json:"temporal_url,omitempty"`
 }
 
 // Secret defines model for Secret.
@@ -996,41 +1635,15 @@ type Subscription struct {
 	Status string `json:"status"`
 }
 
-// SystemInfoRepresentation defines model for SystemInfoRepresentation.
-type SystemInfoRepresentation struct {
-	FileEncoding   *string `json:"fileEncoding,omitempty"`
-	JavaHome       *string `json:"javaHome,omitempty"`
-	JavaRuntime    *string `json:"javaRuntime,omitempty"`
-	JavaVendor     *string `json:"javaVendor,omitempty"`
-	JavaVersion    *string `json:"javaVersion,omitempty"`
-	JavaVm         *string `json:"javaVm,omitempty"`
-	JavaVmVersion  *string `json:"javaVmVersion,omitempty"`
-	OsArchitecture *string `json:"osArchitecture,omitempty"`
-	OsName         *string `json:"osName,omitempty"`
-	OsVersion      *string `json:"osVersion,omitempty"`
-	ServerTime     *string `json:"serverTime,omitempty"`
-	Uptime         *string `json:"uptime,omitempty"`
-	UptimeMillis   *int64  `json:"uptimeMillis,omitempty"`
-	UserDir        *string `json:"userDir,omitempty"`
-	UserLocale     *string `json:"userLocale,omitempty"`
-	UserName       *string `json:"userName,omitempty"`
-	UserTimezone   *string `json:"userTimezone,omitempty"`
-	Version        *string `json:"version,omitempty"`
-}
-
 // TelemetryExport defines model for TelemetryExport.
 type TelemetryExport struct {
-	Enabled  *bool   `json:"enabled,omitempty"`
-	Endpoint *string `json:"endpoint,omitempty"`
-
-	// LastDeliveryAt Example: 2022-03-10
-	LastDeliveryAt *openapi_types.Date `json:"lastDeliveryAt,omitempty"`
-	LastError      *string             `json:"lastError,omitempty"`
-	LoggerScope    *string             `json:"loggerScope,omitempty"`
-	Protocol       *string             `json:"protocol,omitempty"`
-	Signals        *[]string           `json:"signals,omitempty"`
-	Token          *string             `json:"token,omitempty"`
-	TokenSet       *bool               `json:"tokenSet,omitempty"`
+	Enabled     *bool     `json:"enabled,omitempty"`
+	Endpoint    *string   `json:"endpoint,omitempty"`
+	LoggerScope *string   `json:"loggerScope,omitempty"`
+	Protocol    *string   `json:"protocol,omitempty"`
+	Signals     *[]string `json:"signals,omitempty"`
+	Token       *string   `json:"token,omitempty"`
+	TokenSet    *bool     `json:"tokenSet,omitempty"`
 }
 
 // Tier defines model for Tier.
@@ -1071,10 +1684,11 @@ type TokenResponse struct {
 
 // WellKnown defines model for WellKnown.
 type WellKnown struct {
-	ChangePasswordUrl  *string          `json:"change_password_url,omitempty"`
-	Domain             *string          `json:"domain,omitempty"`
-	Files              *[]WellKnownFile `json:"files,omitempty"`
-	PropagationSeconds *int32           `json:"propagation_seconds,omitempty"`
+	ChangePasswordAvailable *bool            `json:"change_password_available,omitempty"`
+	ChangePasswordUrl       *string          `json:"change_password_url,omitempty"`
+	Domain                  *string          `json:"domain,omitempty"`
+	Files                   *[]WellKnownFile `json:"files,omitempty"`
+	PropagationSeconds      *int32           `json:"propagation_seconds,omitempty"`
 }
 
 // WellKnownFile defines model for WellKnownFile.
@@ -1145,6 +1759,12 @@ type ClusterTelemetryExportEndpointValidateParams struct {
 	Endpoint string `form:"endpoint" json:"endpoint"`
 }
 
+// DeploymentProtectedAppVerifyParams defines parameters for DeploymentProtectedAppVerify.
+type DeploymentProtectedAppVerifyParams struct {
+	// Secret `current` (default) or `next`.
+	Secret *string `form:"secret,omitempty" json:"secret,omitempty"`
+}
+
 // ClusterCreateJSONRequestBody defines body for ClusterCreate for application/json ContentType.
 type ClusterCreateJSONRequestBody = DedicatedClusterRequest
 
@@ -1159,6 +1779,9 @@ type ClusterDeploymentImportMultipartRequestBody ClusterDeploymentImportMultipar
 
 // ClusterDomainCreateJSONRequestBody defines body for ClusterDomainCreate for application/json ContentType.
 type ClusterDomainCreateJSONRequestBody = ClusterDomain
+
+// ClusterDomainRootRedirectUpdateJSONRequestBody defines body for ClusterDomainRootRedirectUpdate for application/json ContentType.
+type ClusterDomainRootRedirectUpdateJSONRequestBody = RootRedirect
 
 // ClusterEnvVarCreateJSONRequestBody defines body for ClusterEnvVarCreate for application/json ContentType.
 type ClusterEnvVarCreateJSONRequestBody = EnvironmentVariableRequest
@@ -1202,6 +1825,9 @@ type ClusterHostUpdateJSONRequestBody = ClusterDomain
 // ClusterIpRuleUpdateJSONRequestBody defines body for ClusterIpRuleUpdate for application/json ContentType.
 type ClusterIpRuleUpdateJSONRequestBody = IpRestrictionsRequest
 
+// ClusterRemoveNowJSONRequestBody defines body for ClusterRemoveNow for application/json ContentType.
+type ClusterRemoveNowJSONRequestBody = DeprovisionRequest
+
 // ClusterTelemetryExportUpdateJSONRequestBody defines body for ClusterTelemetryExportUpdate for application/json ContentType.
 type ClusterTelemetryExportUpdateJSONRequestBody = TelemetryExport
 
@@ -1211,8 +1837,17 @@ type DeploymentUpdateJSONRequestBody = Deployment
 // DeploymentAppLinkCreateJSONRequestBody defines body for DeploymentAppLinkCreate for application/json ContentType.
 type DeploymentAppLinkCreateJSONRequestBody = AppLinkRequest
 
+// DeploymentProtectedAppCreateJSONRequestBody defines body for DeploymentProtectedAppCreate for application/json ContentType.
+type DeploymentProtectedAppCreateJSONRequestBody = ProtectedAppRequest
+
+// DeploymentProtectedAppUpdateJSONRequestBody defines body for DeploymentProtectedAppUpdate for application/json ContentType.
+type DeploymentProtectedAppUpdateJSONRequestBody = ProtectedAppRequest
+
 // DeploymentCredentialCreateJSONRequestBody defines body for DeploymentCredentialCreate for application/json ContentType.
 type DeploymentCredentialCreateJSONRequestBody = DeploymentCredentialRequest
+
+// MeDeleteJSONRequestBody defines body for MeDelete for application/json ContentType.
+type MeDeleteJSONRequestBody = DeprovisionRequest
 
 // OrgPaymentMethodSetupSessionCreateJSONRequestBody defines body for OrgPaymentMethodSetupSessionCreate for application/json ContentType.
 type OrgPaymentMethodSetupSessionCreateJSONRequestBody = RedirectRequest
@@ -1337,6 +1972,13 @@ type ClientInterface interface {
 	// Corresponds with GET /clusters/name-available (the `ClusterNameAvailabilityCheck` operationId).
 	ClusterNameAvailabilityCheck(ctx context.Context, params *ClusterNameAvailabilityCheckParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ClusterNamePrefixGet Get the cluster name prefix for this environment.
+	//
+	// Returns the prefix new dedicated cluster names in this environment should start with, or an empty prefix when the environment has none.
+	//
+	// Corresponds with GET /clusters/name-prefix (the `ClusterNamePrefixGet` operationId).
+	ClusterNamePrefixGet(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ClusterRegionList List regions available for dedicated clusters.
 	//
 	// Returns the AWS regions a new dedicated cluster can be provisioned into.
@@ -1424,7 +2066,7 @@ type ClientInterface interface {
 
 	// ClusterDeploymentNameAvailabilityCheck Check whether a deployment name is available on a cluster.
 	//
-	// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed, not reserved, and not already in use on this cluster).
+	// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed and not already in use on this cluster).
 	//
 	// Corresponds with GET /clusters/{id}/deployments/name-available (the `ClusterDeploymentNameAvailabilityCheck` operationId).
 	ClusterDeploymentNameAvailabilityCheck(ctx context.Context, id string, params *ClusterDeploymentNameAvailabilityCheckParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1456,7 +2098,7 @@ type ClientInterface interface {
 
 	// ClusterDomainDelete Remove a custom domain by ID.
 	//
-	// Deletes a custom domain from the cluster. If it is currently the cluster's primary hostname, switch the primary hostname away from it first.
+	// Deletes a custom domain from the cluster. If it serves the cluster's primary hostname (it is that hostname, or a wildcard covering it), switch the primary hostname away from it first.
 	//
 	// Corresponds with DELETE /clusters/{id}/domains/{domainId} (the `ClusterDomainDelete` operationId).
 	ClusterDomainDelete(ctx context.Context, id string, domainId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1467,6 +2109,24 @@ type ClientInterface interface {
 	//
 	// Corresponds with GET /clusters/{id}/domains/{domainId} (the `ClusterDomainDetail` operationId).
 	ClusterDomainDetail(ctx context.Context, id string, domainId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterDomainRootRedirectUpdateWithBody Set or clear a custom domain's root redirect.
+	//
+	// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+	ClusterDomainRootRedirectUpdateWithBody(ctx context.Context, id string, domainId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterDomainRootRedirectUpdate Set or clear a custom domain's root redirect.
+	//
+	// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+	ClusterDomainRootRedirectUpdate(ctx context.Context, id string, domainId string, body ClusterDomainRootRedirectUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClusterDomainStatusDetail Get a custom domain's provisioning status.
 	//
@@ -1603,7 +2263,7 @@ type ClientInterface interface {
 
 	// ClusterExtensionStandaloneUploadUrlCreateWithBody Create an upload URL for a standalone extension.
 	//
-	// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+	// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -1612,7 +2272,7 @@ type ClientInterface interface {
 
 	// ClusterExtensionStandaloneUploadUrlCreate Create an upload URL for a standalone extension.
 	//
-	// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+	// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1621,7 +2281,7 @@ type ClientInterface interface {
 
 	// ClusterExtensionStandaloneConfirmWithBody Confirm a standalone extension upload.
 	//
-	// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+	// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -1630,7 +2290,7 @@ type ClientInterface interface {
 
 	// ClusterExtensionStandaloneConfirm Confirm a standalone extension upload.
 	//
-	// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+	// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1748,7 +2408,7 @@ type ClientInterface interface {
 
 	// ClusterWellKnownChangePasswordSetWithBody Set the change-password redirect for a custom domain.
 	//
-	// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+	// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 	//
 	// Takes any type of body and a specified content type.
 	//
@@ -1757,7 +2417,7 @@ type ClientInterface interface {
 
 	// ClusterWellKnownChangePasswordSet Set the change-password redirect for a custom domain.
 	//
-	// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+	// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 	//
 	// Takes a body of the `application/json` content type.
 	//
@@ -1852,6 +2512,24 @@ type ClientInterface interface {
 	// Corresponds with GET /clusters/{id}/metrics (the `ClusterMetricsDetail` operationId).
 	ClusterMetricsDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ClusterRemoveNowWithBody Remove a trial cluster now.
+	//
+	// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+	ClusterRemoveNowWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterRemoveNow Remove a trial cluster now.
+	//
+	// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+	ClusterRemoveNow(ctx context.Context, id string, body ClusterRemoveNowJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ClusterRestartStatusDetail Check whether a cluster restart is in progress.
 	//
 	// Configuration changes (environment variables, extensions) restart the cluster's Keycloak deployment to take effect; use this to poll until a restart completes before making another change.
@@ -1861,7 +2539,7 @@ type ClientInterface interface {
 
 	// ClusterSystemInfoDetail Get system info for a dedicated cluster.
 	//
-	// Returns the cluster's Keycloak server info (version, build time, etc). Only available while the cluster is ACTIVE.
+	// Returns the cluster's Keycloak server info (version, build time, etc) plus its Phase Two release build tag (issue #538). Only available while the cluster is ACTIVE.
 	//
 	// Corresponds with GET /clusters/{id}/systeminfo (the `ClusterSystemInfoDetail` operationId).
 	ClusterSystemInfoDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1900,7 +2578,7 @@ type ClientInterface interface {
 
 	// DeploymentDelete Remove a deployment by ID.
 	//
-	// Permanently deletes a deployment (realm). Only the owner may delete it.
+	// Permanently deletes a deployment (realm). Allowed for the realm's owner (its creator) and for members of the cluster's organization with the manage-clusters role.
 	//
 	// Corresponds with DELETE /deployments/{id} (the `DeploymentDelete` operationId).
 	DeploymentDelete(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1947,6 +2625,92 @@ type ClientInterface interface {
 	//
 	// Corresponds with POST /deployments/{id}/app-link (the `DeploymentAppLinkCreate` operationId).
 	DeploymentAppLinkCreate(ctx context.Context, id string, body DeploymentAppLinkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppList List protected apps for a deployment.
+	//
+	// Corresponds with GET /deployments/{id}/apps (the `DeploymentProtectedAppList` operationId).
+	DeploymentProtectedAppList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppCreateWithBody Create a protected app.
+	//
+	// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+	DeploymentProtectedAppCreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppCreate Create a protected app.
+	//
+	// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+	DeploymentProtectedAppCreate(ctx context.Context, id string, body DeploymentProtectedAppCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppDelete Delete a protected app.
+	//
+	// Stops serving it immediately, then removes its Cloudflare hostname and the OIDC client Phase Two created.
+	//
+	// Corresponds with DELETE /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDelete` operationId).
+	DeploymentProtectedAppDelete(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppDetail Get a protected app, with live hostname and readiness status.
+	//
+	// Corresponds with GET /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDetail` operationId).
+	DeploymentProtectedAppDetail(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppUpdateWithBody Update a protected app.
+	//
+	// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+	DeploymentProtectedAppUpdateWithBody(ctx context.Context, id string, appId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppUpdate Update a protected app.
+	//
+	// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+	DeploymentProtectedAppUpdate(ctx context.Context, id string, appId string, body DeploymentProtectedAppUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppActivate Start serving a protected app.
+	//
+	// Requires a VERIFIED origin, an active Cloudflare hostname and certificate, and a realm whose discovery still matches the app's issuer. 409 with the missing piece otherwise.
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/activate (the `DeploymentProtectedAppActivate` operationId).
+	DeploymentProtectedAppActivate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppDeactivate Stop serving a protected app immediately and end its sessions.
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/deactivate (the `DeploymentProtectedAppDeactivate` operationId).
+	DeploymentProtectedAppDeactivate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppSecretPromote Start sending the rotated secret.
+	//
+	// Requires the rotated secret to have been verified. Then remove the old one from your ingress.
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/promote (the `DeploymentProtectedAppSecretPromote` operationId).
+	DeploymentProtectedAppSecretPromote(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppSecretRotate Issue a new origin secret.
+	//
+	// Returns the new secret once. The Worker keeps sending the current one until `promote`, so add the new value to your ingress alongside the old first.
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/rotate (the `DeploymentProtectedAppSecretRotate` operationId).
+	DeploymentProtectedAppSecretRotate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeploymentProtectedAppVerify Verify that the origin requires the secret.
+	//
+	// Sends four probes to the health path: with the secret, without it, with a wrong one, and with forged identity headers. Only an explicit 401/403 for the last three counts. `secret=next` tests a rotated secret before it is promoted.
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/verify (the `DeploymentProtectedAppVerify` operationId).
+	DeploymentProtectedAppVerify(ctx context.Context, id string, appId string, params *DeploymentProtectedAppVerifyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeploymentConsoleLinkCreate Create an admin console link for a deployment.
 	//
@@ -2006,12 +2770,44 @@ type ClientInterface interface {
 	// Corresponds with POST /deployments/{id}/token (the `DeploymentTokenCreate` operationId).
 	DeploymentTokenCreate(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// MeDeleteWithBody Delete your own account.
+	//
+	// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+	//
+	// Takes any type of body and a specified content type.
+	//
+	// Corresponds with DELETE /me (the `MeDelete` operationId).
+	MeDeleteWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// MeDelete Delete your own account.
+	//
+	// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+	//
+	// Takes a body of the `application/json` content type.
+	//
+	// Corresponds with DELETE /me (the `MeDelete` operationId).
+	MeDelete(ctx context.Context, body MeDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// MeDeletionPreview Preview deleting your own account.
+	//
+	// What deleting your account would do to each of your organizations, and anything that has to be resolved first.
+	//
+	// Corresponds with GET /me/deletion-preview (the `MeDeletionPreview` operationId).
+	MeDeletionPreview(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// OrgList List your organizations.
 	//
 	// Returns the organizations the authenticated API client belongs to, along with the roles held in each.
 	//
 	// Corresponds with GET /orgs (the `OrgList` operationId).
 	OrgList(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// OrgDelete Delete an organization.
+	//
+	// Deletes the organization. Refused with 409 while it still has a cluster that has not been torn down. This cannot be undone.
+	//
+	// Corresponds with DELETE /orgs/{orgId} (the `OrgDelete` operationId).
+	OrgDelete(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// OrgBillingContactList List billing contacts for this organization.
 	//
@@ -2225,6 +3021,23 @@ func (c *Client) ClusterNameAvailabilityCheck(ctx context.Context, params *Clust
 	return c.Client.Do(req)
 }
 
+// ClusterNamePrefixGet Get the cluster name prefix for this environment.
+//
+// Returns the prefix new dedicated cluster names in this environment should start with, or an empty prefix when the environment has none.
+//
+// Corresponds with GET /clusters/name-prefix (the `ClusterNamePrefixGet` operationId).
+func (c *Client) ClusterNamePrefixGet(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterNamePrefixGetRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // ClusterRegionList List regions available for dedicated clusters.
 //
 // Returns the AWS regions a new dedicated cluster can be provisioned into.
@@ -2421,7 +3234,7 @@ func (c *Client) ClusterDeploymentImportWithBody(ctx context.Context, id string,
 
 // ClusterDeploymentNameAvailabilityCheck Check whether a deployment name is available on a cluster.
 //
-// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed, not reserved, and not already in use on this cluster).
+// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed and not already in use on this cluster).
 //
 // Corresponds with GET /clusters/{id}/deployments/name-available (the `ClusterDeploymentNameAvailabilityCheck` operationId).
 func (c *Client) ClusterDeploymentNameAvailabilityCheck(ctx context.Context, id string, params *ClusterDeploymentNameAvailabilityCheckParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -2493,7 +3306,7 @@ func (c *Client) ClusterDomainCreate(ctx context.Context, id string, body Cluste
 
 // ClusterDomainDelete Remove a custom domain by ID.
 //
-// Deletes a custom domain from the cluster. If it is currently the cluster's primary hostname, switch the primary hostname away from it first.
+// Deletes a custom domain from the cluster. If it serves the cluster's primary hostname (it is that hostname, or a wildcard covering it), switch the primary hostname away from it first.
 //
 // Corresponds with DELETE /clusters/{id}/domains/{domainId} (the `ClusterDomainDelete` operationId).
 func (c *Client) ClusterDomainDelete(ctx context.Context, id string, domainId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -2515,6 +3328,44 @@ func (c *Client) ClusterDomainDelete(ctx context.Context, id string, domainId st
 // Corresponds with GET /clusters/{id}/domains/{domainId} (the `ClusterDomainDetail` operationId).
 func (c *Client) ClusterDomainDetail(ctx context.Context, id string, domainId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewClusterDomainDetailRequest(c.Server, id, domainId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterDomainRootRedirectUpdateWithBody Set or clear a custom domain's root redirect.
+//
+// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+func (c *Client) ClusterDomainRootRedirectUpdateWithBody(ctx context.Context, id string, domainId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterDomainRootRedirectUpdateRequestWithBody(c.Server, id, domainId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterDomainRootRedirectUpdate Set or clear a custom domain's root redirect.
+//
+// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+func (c *Client) ClusterDomainRootRedirectUpdate(ctx context.Context, id string, domainId string, body ClusterDomainRootRedirectUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterDomainRootRedirectUpdateRequest(c.Server, id, domainId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2830,7 +3681,7 @@ func (c *Client) ClusterExtensionUpdate(ctx context.Context, id string, extensio
 
 // ClusterExtensionStandaloneUploadUrlCreateWithBody Create an upload URL for a standalone extension.
 //
-// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 //
 // Takes any type of body and a specified content type.
 //
@@ -2849,7 +3700,7 @@ func (c *Client) ClusterExtensionStandaloneUploadUrlCreateWithBody(ctx context.C
 
 // ClusterExtensionStandaloneUploadUrlCreate Create an upload URL for a standalone extension.
 //
-// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -2868,7 +3719,7 @@ func (c *Client) ClusterExtensionStandaloneUploadUrlCreate(ctx context.Context, 
 
 // ClusterExtensionStandaloneConfirmWithBody Confirm a standalone extension upload.
 //
-// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 //
 // Takes any type of body and a specified content type.
 //
@@ -2887,7 +3738,7 @@ func (c *Client) ClusterExtensionStandaloneConfirmWithBody(ctx context.Context, 
 
 // ClusterExtensionStandaloneConfirm Confirm a standalone extension upload.
 //
-// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 //
 // Takes a body of the `application/json` content type.
 //
@@ -3145,7 +3996,7 @@ func (c *Client) ClusterWellKnownGet(ctx context.Context, id string, extensionId
 
 // ClusterWellKnownChangePasswordSetWithBody Set the change-password redirect for a custom domain.
 //
-// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 //
 // Takes any type of body and a specified content type.
 //
@@ -3164,7 +4015,7 @@ func (c *Client) ClusterWellKnownChangePasswordSetWithBody(ctx context.Context, 
 
 // ClusterWellKnownChangePasswordSet Set the change-password redirect for a custom domain.
 //
-// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 //
 // Takes a body of the `application/json` content type.
 //
@@ -3389,6 +4240,44 @@ func (c *Client) ClusterMetricsDetail(ctx context.Context, id string, reqEditors
 	return c.Client.Do(req)
 }
 
+// ClusterRemoveNowWithBody Remove a trial cluster now.
+//
+// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+func (c *Client) ClusterRemoveNowWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterRemoveNowRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// ClusterRemoveNow Remove a trial cluster now.
+//
+// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+func (c *Client) ClusterRemoveNow(ctx context.Context, id string, body ClusterRemoveNowJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterRemoveNowRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // ClusterRestartStatusDetail Check whether a cluster restart is in progress.
 //
 // Configuration changes (environment variables, extensions) restart the cluster's Keycloak deployment to take effect; use this to poll until a restart completes before making another change.
@@ -3408,7 +4297,7 @@ func (c *Client) ClusterRestartStatusDetail(ctx context.Context, id string, reqE
 
 // ClusterSystemInfoDetail Get system info for a dedicated cluster.
 //
-// Returns the cluster's Keycloak server info (version, build time, etc). Only available while the cluster is ACTIVE.
+// Returns the cluster's Keycloak server info (version, build time, etc) plus its Phase Two release build tag (issue #538). Only available while the cluster is ACTIVE.
 //
 // Corresponds with GET /clusters/{id}/systeminfo (the `ClusterSystemInfoDetail` operationId).
 func (c *Client) ClusterSystemInfoDetail(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -3497,7 +4386,7 @@ func (c *Client) ClusterTelemetryExportEndpointValidate(ctx context.Context, id 
 
 // DeploymentDelete Remove a deployment by ID.
 //
-// Permanently deletes a deployment (realm). Only the owner may delete it.
+// Permanently deletes a deployment (realm). Allowed for the realm's owner (its creator) and for members of the cluster's organization with the manage-clusters role.
 //
 // Corresponds with DELETE /deployments/{id} (the `DeploymentDelete` operationId).
 func (c *Client) DeploymentDelete(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -3595,6 +4484,212 @@ func (c *Client) DeploymentAppLinkCreateWithBody(ctx context.Context, id string,
 // Corresponds with POST /deployments/{id}/app-link (the `DeploymentAppLinkCreate` operationId).
 func (c *Client) DeploymentAppLinkCreate(ctx context.Context, id string, body DeploymentAppLinkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeploymentAppLinkCreateRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppList List protected apps for a deployment.
+//
+// Corresponds with GET /deployments/{id}/apps (the `DeploymentProtectedAppList` operationId).
+func (c *Client) DeploymentProtectedAppList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppListRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppCreateWithBody Create a protected app.
+//
+// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+func (c *Client) DeploymentProtectedAppCreateWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppCreateRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppCreate Create a protected app.
+//
+// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+func (c *Client) DeploymentProtectedAppCreate(ctx context.Context, id string, body DeploymentProtectedAppCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppCreateRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppDelete Delete a protected app.
+//
+// Stops serving it immediately, then removes its Cloudflare hostname and the OIDC client Phase Two created.
+//
+// Corresponds with DELETE /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDelete` operationId).
+func (c *Client) DeploymentProtectedAppDelete(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppDeleteRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppDetail Get a protected app, with live hostname and readiness status.
+//
+// Corresponds with GET /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDetail` operationId).
+func (c *Client) DeploymentProtectedAppDetail(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppDetailRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppUpdateWithBody Update a protected app.
+//
+// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+func (c *Client) DeploymentProtectedAppUpdateWithBody(ctx context.Context, id string, appId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppUpdateRequestWithBody(c.Server, id, appId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppUpdate Update a protected app.
+//
+// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+func (c *Client) DeploymentProtectedAppUpdate(ctx context.Context, id string, appId string, body DeploymentProtectedAppUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppUpdateRequest(c.Server, id, appId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppActivate Start serving a protected app.
+//
+// Requires a VERIFIED origin, an active Cloudflare hostname and certificate, and a realm whose discovery still matches the app's issuer. 409 with the missing piece otherwise.
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/activate (the `DeploymentProtectedAppActivate` operationId).
+func (c *Client) DeploymentProtectedAppActivate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppActivateRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppDeactivate Stop serving a protected app immediately and end its sessions.
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/deactivate (the `DeploymentProtectedAppDeactivate` operationId).
+func (c *Client) DeploymentProtectedAppDeactivate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppDeactivateRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppSecretPromote Start sending the rotated secret.
+//
+// Requires the rotated secret to have been verified. Then remove the old one from your ingress.
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/promote (the `DeploymentProtectedAppSecretPromote` operationId).
+func (c *Client) DeploymentProtectedAppSecretPromote(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppSecretPromoteRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppSecretRotate Issue a new origin secret.
+//
+// Returns the new secret once. The Worker keeps sending the current one until `promote`, so add the new value to your ingress alongside the old first.
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/rotate (the `DeploymentProtectedAppSecretRotate` operationId).
+func (c *Client) DeploymentProtectedAppSecretRotate(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppSecretRotateRequest(c.Server, id, appId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// DeploymentProtectedAppVerify Verify that the origin requires the secret.
+//
+// Sends four probes to the health path: with the secret, without it, with a wrong one, and with forged identity headers. Only an explicit 401/403 for the last three counts. `secret=next` tests a rotated secret before it is promoted.
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/verify (the `DeploymentProtectedAppVerify` operationId).
+func (c *Client) DeploymentProtectedAppVerify(ctx context.Context, id string, appId string, params *DeploymentProtectedAppVerifyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeploymentProtectedAppVerifyRequest(c.Server, id, appId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3743,6 +4838,61 @@ func (c *Client) DeploymentTokenCreate(ctx context.Context, id string, reqEditor
 	return c.Client.Do(req)
 }
 
+// MeDeleteWithBody Delete your own account.
+//
+// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+//
+// Takes any type of body and a specified content type.
+//
+// Corresponds with DELETE /me (the `MeDelete` operationId).
+func (c *Client) MeDeleteWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMeDeleteRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// MeDelete Delete your own account.
+//
+// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+//
+// Takes a body of the `application/json` content type.
+//
+// Corresponds with DELETE /me (the `MeDelete` operationId).
+func (c *Client) MeDelete(ctx context.Context, body MeDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMeDeleteRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// MeDeletionPreview Preview deleting your own account.
+//
+// What deleting your account would do to each of your organizations, and anything that has to be resolved first.
+//
+// Corresponds with GET /me/deletion-preview (the `MeDeletionPreview` operationId).
+func (c *Client) MeDeletionPreview(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMeDeletionPreviewRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // OrgList List your organizations.
 //
 // Returns the organizations the authenticated API client belongs to, along with the roles held in each.
@@ -3750,6 +4900,23 @@ func (c *Client) DeploymentTokenCreate(ctx context.Context, id string, reqEditor
 // Corresponds with GET /orgs (the `OrgList` operationId).
 func (c *Client) OrgList(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewOrgListRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// OrgDelete Delete an organization.
+//
+// Deletes the organization. Refused with 409 while it still has a cluster that has not been torn down. This cannot be undone.
+//
+// Corresponds with DELETE /orgs/{orgId} (the `OrgDelete` operationId).
+func (c *Client) OrgDelete(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOrgDeleteRequest(c.Server, orgId)
 	if err != nil {
 		return nil, err
 	}
@@ -4168,6 +5335,33 @@ func NewClusterNameAvailabilityCheckRequest(server string, params *ClusterNameAv
 			rawQueryFragments = append(rawQueryFragments, encoded)
 		}
 		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewClusterNamePrefixGetRequest constructs an http.Request for the ClusterNamePrefixGet method
+func NewClusterNamePrefixGetRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/name-prefix")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
 	}
 
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
@@ -4748,6 +5942,60 @@ func NewClusterDomainDetailRequest(server string, id string, domainId string) (*
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewClusterDomainRootRedirectUpdateRequest calls the generic ClusterDomainRootRedirectUpdate builder with application/json body
+func NewClusterDomainRootRedirectUpdateRequest(server string, id string, domainId string, body ClusterDomainRootRedirectUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterDomainRootRedirectUpdateRequestWithBody(server, id, domainId, "application/json", bodyReader)
+}
+
+// NewClusterDomainRootRedirectUpdateRequestWithBody constructs an http.Request for the ClusterDomainRootRedirectUpdate method, with any body, and a specified content type
+func NewClusterDomainRootRedirectUpdateRequestWithBody(server string, id string, domainId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "domainId", domainId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/domains/%s/root-redirect", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -6431,6 +7679,53 @@ func NewClusterMetricsDetailRequest(server string, id string) (*http.Request, er
 	return req, nil
 }
 
+// NewClusterRemoveNowRequest calls the generic ClusterRemoveNow builder with application/json body
+func NewClusterRemoveNowRequest(server string, id string, body ClusterRemoveNowJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterRemoveNowRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewClusterRemoveNowRequestWithBody constructs an http.Request for the ClusterRemoveNow method, with any body, and a specified content type
+func NewClusterRemoveNowRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/clusters/%s/remove-now", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewClusterRestartStatusDetailRequest constructs an http.Request for the ClusterRestartStatusDetail method
 func NewClusterRestartStatusDetailRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -6799,6 +8094,455 @@ func NewDeploymentAppLinkCreateRequestWithBody(server string, id string, content
 	return req, nil
 }
 
+// NewDeploymentProtectedAppListRequest constructs an http.Request for the DeploymentProtectedAppList method
+func NewDeploymentProtectedAppListRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppCreateRequest calls the generic DeploymentProtectedAppCreate builder with application/json body
+func NewDeploymentProtectedAppCreateRequest(server string, id string, body DeploymentProtectedAppCreateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeploymentProtectedAppCreateRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewDeploymentProtectedAppCreateRequestWithBody constructs an http.Request for the DeploymentProtectedAppCreate method, with any body, and a specified content type
+func NewDeploymentProtectedAppCreateRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppDeleteRequest constructs an http.Request for the DeploymentProtectedAppDelete method
+func NewDeploymentProtectedAppDeleteRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppDetailRequest constructs an http.Request for the DeploymentProtectedAppDetail method
+func NewDeploymentProtectedAppDetailRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppUpdateRequest calls the generic DeploymentProtectedAppUpdate builder with application/json body
+func NewDeploymentProtectedAppUpdateRequest(server string, id string, appId string, body DeploymentProtectedAppUpdateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeploymentProtectedAppUpdateRequestWithBody(server, id, appId, "application/json", bodyReader)
+}
+
+// NewDeploymentProtectedAppUpdateRequestWithBody constructs an http.Request for the DeploymentProtectedAppUpdate method, with any body, and a specified content type
+func NewDeploymentProtectedAppUpdateRequestWithBody(server string, id string, appId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppActivateRequest constructs an http.Request for the DeploymentProtectedAppActivate method
+func NewDeploymentProtectedAppActivateRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s/activate", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppDeactivateRequest constructs an http.Request for the DeploymentProtectedAppDeactivate method
+func NewDeploymentProtectedAppDeactivateRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s/deactivate", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppSecretPromoteRequest constructs an http.Request for the DeploymentProtectedAppSecretPromote method
+func NewDeploymentProtectedAppSecretPromoteRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s/origin-secret/promote", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppSecretRotateRequest constructs an http.Request for the DeploymentProtectedAppSecretRotate method
+func NewDeploymentProtectedAppSecretRotateRequest(server string, id string, appId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s/origin-secret/rotate", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeploymentProtectedAppVerifyRequest constructs an http.Request for the DeploymentProtectedAppVerify method
+func NewDeploymentProtectedAppVerifyRequest(server string, id string, appId string, params *DeploymentProtectedAppVerifyParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithOptions("simple", false, "appId", appId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/deployments/%s/apps/%s/verify", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		// queryValues collects non-styled parameters (passthrough, JSON)
+		// that are safe to round-trip through url.Values.Encode().
+		queryValues := queryURL.Query()
+		// rawQueryFragments collects pre-encoded query fragments from
+		// styled parameters, preserving literal commas as delimiters
+		// per the OpenAPI spec (e.g. "color=blue,black,brown").
+		var rawQueryFragments []string
+
+		if params.Secret != nil {
+
+			if queryFrag, err := runtime.StyleParamWithOptions("form", true, "secret", *params.Secret, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationQuery, Type: "string", Format: ""}); err != nil {
+				return nil, err
+			} else {
+				for _, qp := range strings.Split(queryFrag, "&") {
+					rawQueryFragments = append(rawQueryFragments, qp)
+				}
+			}
+
+		}
+
+		if encoded := queryValues.Encode(); encoded != "" {
+			rawQueryFragments = append(rawQueryFragments, encoded)
+		}
+		queryURL.RawQuery = strings.Join(rawQueryFragments, "&")
+	}
+
+	req, err := http.NewRequest(http.MethodPost, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewDeploymentConsoleLinkCreateRequest constructs an http.Request for the DeploymentConsoleLinkCreate method
 func NewDeploymentConsoleLinkCreateRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -7064,6 +8808,73 @@ func NewDeploymentTokenCreateRequest(server string, id string) (*http.Request, e
 	return req, nil
 }
 
+// NewMeDeleteRequest calls the generic MeDelete builder with application/json body
+func NewMeDeleteRequest(server string, body MeDeleteJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewMeDeleteRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewMeDeleteRequestWithBody constructs an http.Request for the MeDelete method, with any body, and a specified content type
+func NewMeDeleteRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewMeDeletionPreviewRequest constructs an http.Request for the MeDeletionPreview method
+func NewMeDeletionPreviewRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/me/deletion-preview")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewOrgListRequest constructs an http.Request for the OrgList method
 func NewOrgListRequest(server string) (*http.Request, error) {
 	var err error
@@ -7084,6 +8895,40 @@ func NewOrgListRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest(http.MethodGet, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewOrgDeleteRequest constructs an http.Request for the OrgDelete method
+func NewOrgDeleteRequest(server string, orgId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "orgId", orgId, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/orgs/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -7736,6 +9581,15 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /clusters/name-available (the `ClusterNameAvailabilityCheck` operationId).
 	ClusterNameAvailabilityCheckWithResponse(ctx context.Context, params *ClusterNameAvailabilityCheckParams, reqEditors ...RequestEditorFn) (*ClusterNameAvailabilityCheckResponse, error)
 
+	// ClusterNamePrefixGetWithResponse Get the cluster name prefix for this environment.
+	//
+	// Returns the prefix new dedicated cluster names in this environment should start with, or an empty prefix when the environment has none.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /clusters/name-prefix (the `ClusterNamePrefixGet` operationId).
+	ClusterNamePrefixGetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ClusterNamePrefixGetResponse, error)
+
 	// ClusterRegionListWithResponse List regions available for dedicated clusters.
 	//
 	// Returns the AWS regions a new dedicated cluster can be provisioned into.
@@ -7835,7 +9689,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterDeploymentNameAvailabilityCheckWithResponse Check whether a deployment name is available on a cluster.
 	//
-	// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed, not reserved, and not already in use on this cluster).
+	// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed and not already in use on this cluster).
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -7871,7 +9725,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterDomainDeleteWithResponse Remove a custom domain by ID.
 	//
-	// Deletes a custom domain from the cluster. If it is currently the cluster's primary hostname, switch the primary hostname away from it first.
+	// Deletes a custom domain from the cluster. If it serves the cluster's primary hostname (it is that hostname, or a wildcard covering it), switch the primary hostname away from it first.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -7886,6 +9740,24 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with GET /clusters/{id}/domains/{domainId} (the `ClusterDomainDetail` operationId).
 	ClusterDomainDetailWithResponse(ctx context.Context, id string, domainId string, reqEditors ...RequestEditorFn) (*ClusterDomainDetailResponse, error)
+
+	// ClusterDomainRootRedirectUpdateWithBodyWithResponse Set or clear a custom domain's root redirect.
+	//
+	// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+	ClusterDomainRootRedirectUpdateWithBodyWithResponse(ctx context.Context, id string, domainId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterDomainRootRedirectUpdateResponse, error)
+
+	// ClusterDomainRootRedirectUpdateWithResponse Set or clear a custom domain's root redirect.
+	//
+	// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+	ClusterDomainRootRedirectUpdateWithResponse(ctx context.Context, id string, domainId string, body ClusterDomainRootRedirectUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterDomainRootRedirectUpdateResponse, error)
 
 	// ClusterDomainStatusDetailWithResponse Get a custom domain's provisioning status.
 	//
@@ -8040,7 +9912,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterExtensionStandaloneUploadUrlCreateWithBodyWithResponse Create an upload URL for a standalone extension.
 	//
-	// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+	// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8049,7 +9921,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterExtensionStandaloneUploadUrlCreateWithResponse Create an upload URL for a standalone extension.
 	//
-	// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+	// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8058,7 +9930,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterExtensionStandaloneConfirmWithBodyWithResponse Confirm a standalone extension upload.
 	//
-	// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+	// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8067,7 +9939,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterExtensionStandaloneConfirmWithResponse Confirm a standalone extension upload.
 	//
-	// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+	// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8191,7 +10063,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterWellKnownChangePasswordSetWithBodyWithResponse Set the change-password redirect for a custom domain.
 	//
-	// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+	// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 	//
 	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8200,7 +10072,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterWellKnownChangePasswordSetWithResponse Set the change-password redirect for a custom domain.
 	//
-	// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+	// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 	//
 	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 	//
@@ -8311,6 +10183,24 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with GET /clusters/{id}/metrics (the `ClusterMetricsDetail` operationId).
 	ClusterMetricsDetailWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ClusterMetricsDetailResponse, error)
 
+	// ClusterRemoveNowWithBodyWithResponse Remove a trial cluster now.
+	//
+	// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+	ClusterRemoveNowWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterRemoveNowResponse, error)
+
+	// ClusterRemoveNowWithResponse Remove a trial cluster now.
+	//
+	// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+	ClusterRemoveNowWithResponse(ctx context.Context, id string, body ClusterRemoveNowJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterRemoveNowResponse, error)
+
 	// ClusterRestartStatusDetailWithResponse Check whether a cluster restart is in progress.
 	//
 	// Configuration changes (environment variables, extensions) restart the cluster's Keycloak deployment to take effect; use this to poll until a restart completes before making another change.
@@ -8322,7 +10212,7 @@ type ClientWithResponsesInterface interface {
 
 	// ClusterSystemInfoDetailWithResponse Get system info for a dedicated cluster.
 	//
-	// Returns the cluster's Keycloak server info (version, build time, etc). Only available while the cluster is ACTIVE.
+	// Returns the cluster's Keycloak server info (version, build time, etc) plus its Phase Two release build tag (issue #538). Only available while the cluster is ACTIVE.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -8367,7 +10257,7 @@ type ClientWithResponsesInterface interface {
 
 	// DeploymentDeleteWithResponse Remove a deployment by ID.
 	//
-	// Permanently deletes a deployment (realm). Only the owner may delete it.
+	// Permanently deletes a deployment (realm). Allowed for the realm's owner (its creator) and for members of the cluster's organization with the manage-clusters role.
 	//
 	// Returns a wrapper object for the known response body format(s).
 	//
@@ -8418,6 +10308,108 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with POST /deployments/{id}/app-link (the `DeploymentAppLinkCreate` operationId).
 	DeploymentAppLinkCreateWithResponse(ctx context.Context, id string, body DeploymentAppLinkCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentAppLinkCreateResponse, error)
+
+	// DeploymentProtectedAppListWithResponse List protected apps for a deployment.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /deployments/{id}/apps (the `DeploymentProtectedAppList` operationId).
+	DeploymentProtectedAppListWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppListResponse, error)
+
+	// DeploymentProtectedAppCreateWithBodyWithResponse Create a protected app.
+	//
+	// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+	DeploymentProtectedAppCreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppCreateResponse, error)
+
+	// DeploymentProtectedAppCreateWithResponse Create a protected app.
+	//
+	// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+	DeploymentProtectedAppCreateWithResponse(ctx context.Context, id string, body DeploymentProtectedAppCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppCreateResponse, error)
+
+	// DeploymentProtectedAppDeleteWithResponse Delete a protected app.
+	//
+	// Stops serving it immediately, then removes its Cloudflare hostname and the OIDC client Phase Two created.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDelete` operationId).
+	DeploymentProtectedAppDeleteWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDeleteResponse, error)
+
+	// DeploymentProtectedAppDetailWithResponse Get a protected app, with live hostname and readiness status.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDetail` operationId).
+	DeploymentProtectedAppDetailWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDetailResponse, error)
+
+	// DeploymentProtectedAppUpdateWithBodyWithResponse Update a protected app.
+	//
+	// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+	DeploymentProtectedAppUpdateWithBodyWithResponse(ctx context.Context, id string, appId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppUpdateResponse, error)
+
+	// DeploymentProtectedAppUpdateWithResponse Update a protected app.
+	//
+	// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+	DeploymentProtectedAppUpdateWithResponse(ctx context.Context, id string, appId string, body DeploymentProtectedAppUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppUpdateResponse, error)
+
+	// DeploymentProtectedAppActivateWithResponse Start serving a protected app.
+	//
+	// Requires a VERIFIED origin, an active Cloudflare hostname and certificate, and a realm whose discovery still matches the app's issuer. 409 with the missing piece otherwise.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/activate (the `DeploymentProtectedAppActivate` operationId).
+	DeploymentProtectedAppActivateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppActivateResponse, error)
+
+	// DeploymentProtectedAppDeactivateWithResponse Stop serving a protected app immediately and end its sessions.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/deactivate (the `DeploymentProtectedAppDeactivate` operationId).
+	DeploymentProtectedAppDeactivateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDeactivateResponse, error)
+
+	// DeploymentProtectedAppSecretPromoteWithResponse Start sending the rotated secret.
+	//
+	// Requires the rotated secret to have been verified. Then remove the old one from your ingress.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/promote (the `DeploymentProtectedAppSecretPromote` operationId).
+	DeploymentProtectedAppSecretPromoteWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppSecretPromoteResponse, error)
+
+	// DeploymentProtectedAppSecretRotateWithResponse Issue a new origin secret.
+	//
+	// Returns the new secret once. The Worker keeps sending the current one until `promote`, so add the new value to your ingress alongside the old first.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/rotate (the `DeploymentProtectedAppSecretRotate` operationId).
+	DeploymentProtectedAppSecretRotateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppSecretRotateResponse, error)
+
+	// DeploymentProtectedAppVerifyWithResponse Verify that the origin requires the secret.
+	//
+	// Sends four probes to the health path: with the secret, without it, with a wrong one, and with forged identity headers. Only an explicit 401/403 for the last three counts. `secret=next` tests a rotated secret before it is promoted.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with POST /deployments/{id}/apps/{appId}/verify (the `DeploymentProtectedAppVerify` operationId).
+	DeploymentProtectedAppVerifyWithResponse(ctx context.Context, id string, appId string, params *DeploymentProtectedAppVerifyParams, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppVerifyResponse, error)
 
 	// DeploymentConsoleLinkCreateWithResponse Create an admin console link for a deployment.
 	//
@@ -8489,6 +10481,33 @@ type ClientWithResponsesInterface interface {
 	// Corresponds with POST /deployments/{id}/token (the `DeploymentTokenCreate` operationId).
 	DeploymentTokenCreateWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentTokenCreateResponse, error)
 
+	// MeDeleteWithBodyWithResponse Delete your own account.
+	//
+	// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+	//
+	// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /me (the `MeDelete` operationId).
+	MeDeleteWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MeDeleteResponse, error)
+
+	// MeDeleteWithResponse Delete your own account.
+	//
+	// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+	//
+	// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /me (the `MeDelete` operationId).
+	MeDeleteWithResponse(ctx context.Context, body MeDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*MeDeleteResponse, error)
+
+	// MeDeletionPreviewWithResponse Preview deleting your own account.
+	//
+	// What deleting your account would do to each of your organizations, and anything that has to be resolved first.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with GET /me/deletion-preview (the `MeDeletionPreview` operationId).
+	MeDeletionPreviewWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*MeDeletionPreviewResponse, error)
+
 	// OrgListWithResponse List your organizations.
 	//
 	// Returns the organizations the authenticated API client belongs to, along with the roles held in each.
@@ -8497,6 +10516,15 @@ type ClientWithResponsesInterface interface {
 	//
 	// Corresponds with GET /orgs (the `OrgList` operationId).
 	OrgListWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*OrgListResponse, error)
+
+	// OrgDeleteWithResponse Delete an organization.
+	//
+	// Deletes the organization. Refused with 409 while it still has a cluster that has not been torn down. This cannot be undone.
+	//
+	// Returns a wrapper object for the known response body format(s).
+	//
+	// Corresponds with DELETE /orgs/{orgId} (the `OrgDelete` operationId).
+	OrgDeleteWithResponse(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*OrgDeleteResponse, error)
 
 	// OrgBillingContactListWithResponse List billing contacts for this organization.
 	//
@@ -8769,6 +10797,47 @@ func (r ClusterNameAvailabilityCheckResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r ClusterNameAvailabilityCheckResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterNamePrefixGetResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ClusterNamePrefix
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ClusterNamePrefixGetResponse) GetJSON200() *ClusterNamePrefix {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterNamePrefixGetResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterNamePrefixGetResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterNamePrefixGetResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterNamePrefixGetResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -9329,6 +11398,47 @@ func (r ClusterDomainDetailResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r ClusterDomainDetailResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type ClusterDomainRootRedirectUpdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *CustomerDomain
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r ClusterDomainRootRedirectUpdateResponse) GetJSON200() *CustomerDomain {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterDomainRootRedirectUpdateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterDomainRootRedirectUpdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterDomainRootRedirectUpdateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterDomainRootRedirectUpdateResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -10694,6 +12804,40 @@ func (r ClusterMetricsDetailResponse) ContentType() string {
 	return ""
 }
 
+type ClusterRemoveNowResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r ClusterRemoveNowResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterRemoveNowResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterRemoveNowResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r ClusterRemoveNowResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type ClusterRestartStatusDetailResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10739,11 +12883,11 @@ type ClusterSystemInfoDetailResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	// JSON200 the response for an HTTP 200 `application/json` response
-	JSON200 *SystemInfoRepresentation
+	JSON200 *ClusterSystemInfoRepresentation
 }
 
 // GetJSON200 returns the response for an HTTP 200 `application/json` response
-func (r ClusterSystemInfoDetailResponse) GetJSON200() *SystemInfoRepresentation {
+func (r ClusterSystemInfoDetailResponse) GetJSON200() *ClusterSystemInfoRepresentation {
 	return r.JSON200
 }
 
@@ -11022,6 +13166,409 @@ func (r DeploymentAppLinkCreateResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r DeploymentAppLinkCreateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppListResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *[]ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppListResponse) GetJSON200() *[]ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppListResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppListResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppListResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppListResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppCreateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON201 the response for an HTTP 201 `application/json` response
+	JSON201 *ProtectedAppSecret
+}
+
+// GetJSON201 returns the response for an HTTP 201 `application/json` response
+func (r DeploymentProtectedAppCreateResponse) GetJSON201() *ProtectedAppSecret {
+	return r.JSON201
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppCreateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppCreateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppCreateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppCreateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppDeleteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppDeleteResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppDeleteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppDeleteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppDeleteResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppDetailResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppDetailResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppDetailResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppDetailResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppDetailResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppDetailResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppUpdateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppUpdateResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppUpdateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppUpdateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppUpdateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppUpdateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppActivateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppActivateResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppActivateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppActivateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppActivateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppActivateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppDeactivateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppDeactivateResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppDeactivateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppDeactivateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppDeactivateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppDeactivateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppSecretPromoteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppSecretPromoteResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppSecretPromoteResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppSecretPromoteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppSecretPromoteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppSecretPromoteResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppSecretRotateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedAppSecret
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppSecretRotateResponse) GetJSON200() *ProtectedAppSecret {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppSecretRotateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppSecretRotateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppSecretRotateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppSecretRotateResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeploymentProtectedAppVerifyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *ProtectedApp
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r DeploymentProtectedAppVerifyResponse) GetJSON200() *ProtectedApp {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r DeploymentProtectedAppVerifyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r DeploymentProtectedAppVerifyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeploymentProtectedAppVerifyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeploymentProtectedAppVerifyResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -11308,6 +13855,81 @@ func (r DeploymentTokenCreateResponse) ContentType() string {
 	return ""
 }
 
+type MeDeleteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r MeDeleteResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r MeDeleteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r MeDeleteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r MeDeleteResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type MeDeletionPreviewResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	// JSON200 the response for an HTTP 200 `application/json` response
+	JSON200 *AccountDeletionPreview
+}
+
+// GetJSON200 returns the response for an HTTP 200 `application/json` response
+func (r MeDeletionPreviewResponse) GetJSON200() *AccountDeletionPreview {
+	return r.JSON200
+}
+
+// GetBody returns the raw response body bytes
+func (r MeDeletionPreviewResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r MeDeletionPreviewResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r MeDeletionPreviewResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r MeDeletionPreviewResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
 type OrgListResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -11343,6 +13965,40 @@ func (r OrgListResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r OrgListResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type OrgDeleteResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// GetBody returns the raw response body bytes
+func (r OrgDeleteResponse) GetBody() []byte {
+	return r.Body
+}
+
+// Status returns HTTPResponse.Status
+func (r OrgDeleteResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r OrgDeleteResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r OrgDeleteResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -11956,6 +14612,21 @@ func (c *ClientWithResponses) ClusterNameAvailabilityCheckWithResponse(ctx conte
 	return ParseClusterNameAvailabilityCheckResponse(rsp)
 }
 
+// ClusterNamePrefixGetWithResponse Get the cluster name prefix for this environment.
+//
+// Returns the prefix new dedicated cluster names in this environment should start with, or an empty prefix when the environment has none.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /clusters/name-prefix (the `ClusterNamePrefixGet` operationId).
+func (c *ClientWithResponses) ClusterNamePrefixGetWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ClusterNamePrefixGetResponse, error) {
+	rsp, err := c.ClusterNamePrefixGet(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterNamePrefixGetResponse(rsp)
+}
+
 // ClusterRegionListWithResponse List regions available for dedicated clusters.
 //
 // Returns the AWS regions a new dedicated cluster can be provisioned into.
@@ -12121,7 +14792,7 @@ func (c *ClientWithResponses) ClusterDeploymentImportWithBodyWithResponse(ctx co
 
 // ClusterDeploymentNameAvailabilityCheckWithResponse Check whether a deployment name is available on a cluster.
 //
-// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed, not reserved, and not already in use on this cluster).
+// Validates a candidate name for a new deployment on this cluster and reports whether it is available (well-formed and not already in use on this cluster).
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -12181,7 +14852,7 @@ func (c *ClientWithResponses) ClusterDomainCreateWithResponse(ctx context.Contex
 
 // ClusterDomainDeleteWithResponse Remove a custom domain by ID.
 //
-// Deletes a custom domain from the cluster. If it is currently the cluster's primary hostname, switch the primary hostname away from it first.
+// Deletes a custom domain from the cluster. If it serves the cluster's primary hostname (it is that hostname, or a wildcard covering it), switch the primary hostname away from it first.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -12207,6 +14878,36 @@ func (c *ClientWithResponses) ClusterDomainDetailWithResponse(ctx context.Contex
 		return nil, err
 	}
 	return ParseClusterDomainDetailResponse(rsp)
+}
+
+// ClusterDomainRootRedirectUpdateWithBodyWithResponse Set or clear a custom domain's root redirect.
+//
+// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+func (c *ClientWithResponses) ClusterDomainRootRedirectUpdateWithBodyWithResponse(ctx context.Context, id string, domainId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterDomainRootRedirectUpdateResponse, error) {
+	rsp, err := c.ClusterDomainRootRedirectUpdateWithBody(ctx, id, domainId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterDomainRootRedirectUpdateResponse(rsp)
+}
+
+// ClusterDomainRootRedirectUpdateWithResponse Set or clear a custom domain's root redirect.
+//
+// Visitors to the domain's bare hostname (`/`, `/auth` or `/auth/`) are sent to this URL with a 302 instead of seeing a neutral page. The URL must use https and be on the same registrable domain as the custom domain or as another custom domain of the cluster, and the domain's certificate must be issued. Send a null or empty url to clear it. Takes effect within seconds.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /clusters/{id}/domains/{domainId}/root-redirect (the `ClusterDomainRootRedirectUpdate` operationId).
+func (c *ClientWithResponses) ClusterDomainRootRedirectUpdateWithResponse(ctx context.Context, id string, domainId string, body ClusterDomainRootRedirectUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterDomainRootRedirectUpdateResponse, error) {
+	rsp, err := c.ClusterDomainRootRedirectUpdate(ctx, id, domainId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterDomainRootRedirectUpdateResponse(rsp)
 }
 
 // ClusterDomainStatusDetailWithResponse Get a custom domain's provisioning status.
@@ -12464,7 +15165,7 @@ func (c *ClientWithResponses) ClusterExtensionUpdateWithResponse(ctx context.Con
 
 // ClusterExtensionStandaloneUploadUrlCreateWithBodyWithResponse Create an upload URL for a standalone extension.
 //
-// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12479,7 +15180,7 @@ func (c *ClientWithResponses) ClusterExtensionStandaloneUploadUrlCreateWithBodyW
 
 // ClusterExtensionStandaloneUploadUrlCreateWithResponse Create an upload URL for a standalone extension.
 //
-// Creates the extension's single (version-independent) version and returns a presigned S3 URL to upload its jar to. After uploading, call the extension's `confirm` operation to finalize it.
+// Starts a new upload of the extension's single (version-independent) file and returns a presigned S3 URL to upload it to. After uploading, call the extension's `confirm` operation to finalize it. The currently deployed file stays in place until that confirm succeeds.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12494,7 +15195,7 @@ func (c *ClientWithResponses) ClusterExtensionStandaloneUploadUrlCreateWithRespo
 
 // ClusterExtensionStandaloneConfirmWithBodyWithResponse Confirm a standalone extension upload.
 //
-// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12509,7 +15210,7 @@ func (c *ClientWithResponses) ClusterExtensionStandaloneConfirmWithBodyWithRespo
 
 // ClusterExtensionStandaloneConfirmWithResponse Confirm a standalone extension upload.
 //
-// Verifies the jar was uploaded to the presigned URL and records its location on the extension version, making it available for deployment.
+// Verifies the file was uploaded to the presigned URL, records its location on the pending version, and replaces the previously deployed version with it. Repeating a confirm that already succeeded returns the confirmed version.
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12717,7 +15418,7 @@ func (c *ClientWithResponses) ClusterWellKnownGetWithResponse(ctx context.Contex
 
 // ClusterWellKnownChangePasswordSetWithBodyWithResponse Set the change-password redirect for a custom domain.
 //
-// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 //
 // Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12732,7 +15433,7 @@ func (c *ClientWithResponses) ClusterWellKnownChangePasswordSetWithBodyWithRespo
 
 // ClusterWellKnownChangePasswordSetWithResponse Set the change-password redirect for a custom domain.
 //
-// Password managers fetch /.well-known/change-password to offer a "change password" action. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention.
+// Password managers fetch /.well-known/change-password to offer a "change password" action; the edge answers it with a 302 to this URL, which must be https on the same domain. Send a null or empty url to clear it, which returns the path to 404 — spec-safe, and simply means the site does not advertise the convention. Setting one needs the domain's certificate issued, and is refused with 409 until the feature reaches the cluster (`change_password_available`).
 //
 // Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
 //
@@ -12921,6 +15622,36 @@ func (c *ClientWithResponses) ClusterMetricsDetailWithResponse(ctx context.Conte
 	return ParseClusterMetricsDetailResponse(rsp)
 }
 
+// ClusterRemoveNowWithBodyWithResponse Remove a trial cluster now.
+//
+// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+func (c *ClientWithResponses) ClusterRemoveNowWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ClusterRemoveNowResponse, error) {
+	rsp, err := c.ClusterRemoveNowWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterRemoveNowResponse(rsp)
+}
+
+// ClusterRemoveNowWithResponse Remove a trial cluster now.
+//
+// Tears down a trial cluster that is already scheduled for deletion immediately, instead of at the end of the trial. The body's `confirm` must equal `Remove <cluster name>`. Only for clusters on a free trial. This cannot be undone.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /clusters/{id}/remove-now (the `ClusterRemoveNow` operationId).
+func (c *ClientWithResponses) ClusterRemoveNowWithResponse(ctx context.Context, id string, body ClusterRemoveNowJSONRequestBody, reqEditors ...RequestEditorFn) (*ClusterRemoveNowResponse, error) {
+	rsp, err := c.ClusterRemoveNow(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterRemoveNowResponse(rsp)
+}
+
 // ClusterRestartStatusDetailWithResponse Check whether a cluster restart is in progress.
 //
 // Configuration changes (environment variables, extensions) restart the cluster's Keycloak deployment to take effect; use this to poll until a restart completes before making another change.
@@ -12938,7 +15669,7 @@ func (c *ClientWithResponses) ClusterRestartStatusDetailWithResponse(ctx context
 
 // ClusterSystemInfoDetailWithResponse Get system info for a dedicated cluster.
 //
-// Returns the cluster's Keycloak server info (version, build time, etc). Only available while the cluster is ACTIVE.
+// Returns the cluster's Keycloak server info (version, build time, etc) plus its Phase Two release build tag (issue #538). Only available while the cluster is ACTIVE.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -13013,7 +15744,7 @@ func (c *ClientWithResponses) ClusterTelemetryExportEndpointValidateWithResponse
 
 // DeploymentDeleteWithResponse Remove a deployment by ID.
 //
-// Permanently deletes a deployment (realm). Only the owner may delete it.
+// Permanently deletes a deployment (realm). Allowed for the realm's owner (its creator) and for members of the cluster's organization with the manage-clusters role.
 //
 // Returns a wrapper object for the known response body format(s).
 //
@@ -13099,6 +15830,180 @@ func (c *ClientWithResponses) DeploymentAppLinkCreateWithResponse(ctx context.Co
 		return nil, err
 	}
 	return ParseDeploymentAppLinkCreateResponse(rsp)
+}
+
+// DeploymentProtectedAppListWithResponse List protected apps for a deployment.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /deployments/{id}/apps (the `DeploymentProtectedAppList` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppListWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppListResponse, error) {
+	rsp, err := c.DeploymentProtectedAppList(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppListResponse(rsp)
+}
+
+// DeploymentProtectedAppCreateWithBodyWithResponse Create a protected app.
+//
+// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppCreateWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppCreateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppCreateWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppCreateResponse(rsp)
+}
+
+// DeploymentProtectedAppCreateWithResponse Create a protected app.
+//
+// Creates an OIDC client for the app in this deployment's realm, generates its origin secret and requests its Cloudflare hostname. The secret is in this response and is never shown again. The app stays PENDING until verified and activated.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps (the `DeploymentProtectedAppCreate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppCreateWithResponse(ctx context.Context, id string, body DeploymentProtectedAppCreateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppCreateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppCreate(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppCreateResponse(rsp)
+}
+
+// DeploymentProtectedAppDeleteWithResponse Delete a protected app.
+//
+// Stops serving it immediately, then removes its Cloudflare hostname and the OIDC client Phase Two created.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDelete` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppDeleteWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDeleteResponse, error) {
+	rsp, err := c.DeploymentProtectedAppDelete(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppDeleteResponse(rsp)
+}
+
+// DeploymentProtectedAppDetailWithResponse Get a protected app, with live hostname and readiness status.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppDetail` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppDetailWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDetailResponse, error) {
+	rsp, err := c.DeploymentProtectedAppDetail(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppDetailResponse(rsp)
+}
+
+// DeploymentProtectedAppUpdateWithBodyWithResponse Update a protected app.
+//
+// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppUpdateWithBodyWithResponse(ctx context.Context, id string, appId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppUpdateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppUpdateWithBody(ctx, id, appId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppUpdateResponse(rsp)
+}
+
+// DeploymentProtectedAppUpdateWithResponse Update a protected app.
+//
+// Changes take effect on the next request when the app is active. The public hostname cannot change; the origin can only change while the app is not active, and changing it clears the verification.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with PUT /deployments/{id}/apps/{appId} (the `DeploymentProtectedAppUpdate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppUpdateWithResponse(ctx context.Context, id string, appId string, body DeploymentProtectedAppUpdateJSONRequestBody, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppUpdateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppUpdate(ctx, id, appId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppUpdateResponse(rsp)
+}
+
+// DeploymentProtectedAppActivateWithResponse Start serving a protected app.
+//
+// Requires a VERIFIED origin, an active Cloudflare hostname and certificate, and a realm whose discovery still matches the app's issuer. 409 with the missing piece otherwise.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/activate (the `DeploymentProtectedAppActivate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppActivateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppActivateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppActivate(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppActivateResponse(rsp)
+}
+
+// DeploymentProtectedAppDeactivateWithResponse Stop serving a protected app immediately and end its sessions.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/deactivate (the `DeploymentProtectedAppDeactivate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppDeactivateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppDeactivateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppDeactivate(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppDeactivateResponse(rsp)
+}
+
+// DeploymentProtectedAppSecretPromoteWithResponse Start sending the rotated secret.
+//
+// Requires the rotated secret to have been verified. Then remove the old one from your ingress.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/promote (the `DeploymentProtectedAppSecretPromote` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppSecretPromoteWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppSecretPromoteResponse, error) {
+	rsp, err := c.DeploymentProtectedAppSecretPromote(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppSecretPromoteResponse(rsp)
+}
+
+// DeploymentProtectedAppSecretRotateWithResponse Issue a new origin secret.
+//
+// Returns the new secret once. The Worker keeps sending the current one until `promote`, so add the new value to your ingress alongside the old first.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/origin-secret/rotate (the `DeploymentProtectedAppSecretRotate` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppSecretRotateWithResponse(ctx context.Context, id string, appId string, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppSecretRotateResponse, error) {
+	rsp, err := c.DeploymentProtectedAppSecretRotate(ctx, id, appId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppSecretRotateResponse(rsp)
+}
+
+// DeploymentProtectedAppVerifyWithResponse Verify that the origin requires the secret.
+//
+// Sends four probes to the health path: with the secret, without it, with a wrong one, and with forged identity headers. Only an explicit 401/403 for the last three counts. `secret=next` tests a rotated secret before it is promoted.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with POST /deployments/{id}/apps/{appId}/verify (the `DeploymentProtectedAppVerify` operationId).
+func (c *ClientWithResponses) DeploymentProtectedAppVerifyWithResponse(ctx context.Context, id string, appId string, params *DeploymentProtectedAppVerifyParams, reqEditors ...RequestEditorFn) (*DeploymentProtectedAppVerifyResponse, error) {
+	rsp, err := c.DeploymentProtectedAppVerify(ctx, id, appId, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeploymentProtectedAppVerifyResponse(rsp)
 }
 
 // DeploymentConsoleLinkCreateWithResponse Create an admin console link for a deployment.
@@ -13219,6 +16124,51 @@ func (c *ClientWithResponses) DeploymentTokenCreateWithResponse(ctx context.Cont
 	return ParseDeploymentTokenCreateResponse(rsp)
 }
 
+// MeDeleteWithBodyWithResponse Delete your own account.
+//
+// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+//
+// Takes any type of body and a specified content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /me (the `MeDelete` operationId).
+func (c *ClientWithResponses) MeDeleteWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*MeDeleteResponse, error) {
+	rsp, err := c.MeDeleteWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMeDeleteResponse(rsp)
+}
+
+// MeDeleteWithResponse Delete your own account.
+//
+// Deletes your account, leaving or deleting your organizations as the deletion preview describes. `confirm` must equal the preview's `confirmation`. Requires a login in the last 5 minutes. This cannot be undone.
+//
+// Takes a body of the `application/json` content type, and returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /me (the `MeDelete` operationId).
+func (c *ClientWithResponses) MeDeleteWithResponse(ctx context.Context, body MeDeleteJSONRequestBody, reqEditors ...RequestEditorFn) (*MeDeleteResponse, error) {
+	rsp, err := c.MeDelete(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMeDeleteResponse(rsp)
+}
+
+// MeDeletionPreviewWithResponse Preview deleting your own account.
+//
+// What deleting your account would do to each of your organizations, and anything that has to be resolved first.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with GET /me/deletion-preview (the `MeDeletionPreview` operationId).
+func (c *ClientWithResponses) MeDeletionPreviewWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*MeDeletionPreviewResponse, error) {
+	rsp, err := c.MeDeletionPreview(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMeDeletionPreviewResponse(rsp)
+}
+
 // OrgListWithResponse List your organizations.
 //
 // Returns the organizations the authenticated API client belongs to, along with the roles held in each.
@@ -13232,6 +16182,21 @@ func (c *ClientWithResponses) OrgListWithResponse(ctx context.Context, reqEditor
 		return nil, err
 	}
 	return ParseOrgListResponse(rsp)
+}
+
+// OrgDeleteWithResponse Delete an organization.
+//
+// Deletes the organization. Refused with 409 while it still has a cluster that has not been torn down. This cannot be undone.
+//
+// Returns a wrapper object for the known response body format(s).
+//
+// Corresponds with DELETE /orgs/{orgId} (the `OrgDelete` operationId).
+func (c *ClientWithResponses) OrgDeleteWithResponse(ctx context.Context, orgId string, reqEditors ...RequestEditorFn) (*OrgDeleteResponse, error) {
+	rsp, err := c.OrgDelete(ctx, orgId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOrgDeleteResponse(rsp)
 }
 
 // OrgBillingContactListWithResponse List billing contacts for this organization.
@@ -13557,6 +16522,32 @@ func ParseClusterNameAvailabilityCheckResponse(rsp *http.Response) (*ClusterName
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest NameAvailability
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClusterNamePrefixGetResponse parses an HTTP response from a ClusterNamePrefixGetWithResponse call
+func ParseClusterNamePrefixGetResponse(rsp *http.Response) (*ClusterNamePrefixGetResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterNamePrefixGetResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterNamePrefix
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -13911,6 +16902,38 @@ func ParseClusterDomainDetailResponse(rsp *http.Response) (*ClusterDomainDetailR
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClusterDomainRootRedirectUpdateResponse parses an HTTP response from a ClusterDomainRootRedirectUpdateWithResponse call
+func ParseClusterDomainRootRedirectUpdateResponse(rsp *http.Response) (*ClusterDomainRootRedirectUpdateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterDomainRootRedirectUpdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CustomerDomain
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case rsp.StatusCode == 400:
+		break // No content-type
+
+	case rsp.StatusCode == 409:
+		break // No content-type
 
 	}
 
@@ -14754,6 +17777,22 @@ func ParseClusterMetricsDetailResponse(rsp *http.Response) (*ClusterMetricsDetai
 	return response, nil
 }
 
+// ParseClusterRemoveNowResponse parses an HTTP response from a ClusterRemoveNowWithResponse call
+func ParseClusterRemoveNowResponse(rsp *http.Response) (*ClusterRemoveNowResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterRemoveNowResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
 // ParseClusterRestartStatusDetailResponse parses an HTTP response from a ClusterRestartStatusDetailWithResponse call
 func ParseClusterRestartStatusDetailResponse(rsp *http.Response) (*ClusterRestartStatusDetailResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -14795,7 +17834,7 @@ func ParseClusterSystemInfoDetailResponse(rsp *http.Response) (*ClusterSystemInf
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest SystemInfoRepresentation
+		var dest ClusterSystemInfoRepresentation
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -14928,6 +17967,256 @@ func ParseDeploymentAppLinkCreateResponse(rsp *http.Response) (*DeploymentAppLin
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ConsoleLink
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppListResponse parses an HTTP response from a DeploymentProtectedAppListWithResponse call
+func ParseDeploymentProtectedAppListResponse(rsp *http.Response) (*DeploymentProtectedAppListResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppListResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppCreateResponse parses an HTTP response from a DeploymentProtectedAppCreateWithResponse call
+func ParseDeploymentProtectedAppCreateResponse(rsp *http.Response) (*DeploymentProtectedAppCreateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppCreateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest ProtectedAppSecret
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppDeleteResponse parses an HTTP response from a DeploymentProtectedAppDeleteWithResponse call
+func ParseDeploymentProtectedAppDeleteResponse(rsp *http.Response) (*DeploymentProtectedAppDeleteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppDeleteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppDetailResponse parses an HTTP response from a DeploymentProtectedAppDetailWithResponse call
+func ParseDeploymentProtectedAppDetailResponse(rsp *http.Response) (*DeploymentProtectedAppDetailResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppDetailResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppUpdateResponse parses an HTTP response from a DeploymentProtectedAppUpdateWithResponse call
+func ParseDeploymentProtectedAppUpdateResponse(rsp *http.Response) (*DeploymentProtectedAppUpdateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppUpdateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppActivateResponse parses an HTTP response from a DeploymentProtectedAppActivateWithResponse call
+func ParseDeploymentProtectedAppActivateResponse(rsp *http.Response) (*DeploymentProtectedAppActivateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppActivateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppDeactivateResponse parses an HTTP response from a DeploymentProtectedAppDeactivateWithResponse call
+func ParseDeploymentProtectedAppDeactivateResponse(rsp *http.Response) (*DeploymentProtectedAppDeactivateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppDeactivateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppSecretPromoteResponse parses an HTTP response from a DeploymentProtectedAppSecretPromoteWithResponse call
+func ParseDeploymentProtectedAppSecretPromoteResponse(rsp *http.Response) (*DeploymentProtectedAppSecretPromoteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppSecretPromoteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppSecretRotateResponse parses an HTTP response from a DeploymentProtectedAppSecretRotateWithResponse call
+func ParseDeploymentProtectedAppSecretRotateResponse(rsp *http.Response) (*DeploymentProtectedAppSecretRotateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppSecretRotateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedAppSecret
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeploymentProtectedAppVerifyResponse parses an HTTP response from a DeploymentProtectedAppVerifyWithResponse call
+func ParseDeploymentProtectedAppVerifyResponse(rsp *http.Response) (*DeploymentProtectedAppVerifyResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeploymentProtectedAppVerifyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ProtectedApp
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -15110,6 +18399,48 @@ func ParseDeploymentTokenCreateResponse(rsp *http.Response) (*DeploymentTokenCre
 	return response, nil
 }
 
+// ParseMeDeleteResponse parses an HTTP response from a MeDeleteWithResponse call
+func ParseMeDeleteResponse(rsp *http.Response) (*MeDeleteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &MeDeleteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseMeDeletionPreviewResponse parses an HTTP response from a MeDeletionPreviewWithResponse call
+func ParseMeDeletionPreviewResponse(rsp *http.Response) (*MeDeletionPreviewResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &MeDeletionPreviewResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AccountDeletionPreview
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseOrgListResponse parses an HTTP response from a OrgListWithResponse call
 func ParseOrgListResponse(rsp *http.Response) (*OrgListResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -15131,6 +18462,22 @@ func ParseOrgListResponse(rsp *http.Response) (*OrgListResponse, error) {
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseOrgDeleteResponse parses an HTTP response from a OrgDeleteWithResponse call
+func ParseOrgDeleteResponse(rsp *http.Response) (*OrgDeleteResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &OrgDeleteResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
 	}
 
 	return response, nil

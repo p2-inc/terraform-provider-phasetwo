@@ -66,6 +66,8 @@ func TestGetProviderSchema(t *testing.T) {
 		"phasetwo_cluster_extension_version",
 		"phasetwo_cluster_ip_rules",
 		"phasetwo_cluster_primary_host",
+		"phasetwo_gateway_app",
+		"phasetwo_gateway_app_activation",
 		"phasetwo_realm",
 		"phasetwo_realm_credential",
 	}

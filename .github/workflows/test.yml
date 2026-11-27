@@ -70,6 +70,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      # The Gateway resource tests drive real terraform against a fake API.
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
       - run: go test ./... -timeout=120s -race -coverprofile=coverage.out
       - run: go tool cover -func=coverage.out | tail -1
 

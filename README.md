@@ -30,7 +30,8 @@ Manage [Phase Two](https://phasetwo.io) hosted Keycloak clusters and the realms 
 > it at an environment you do not mind breaking.
 
 The provider covers cluster lifecycle and the things configured on a cluster: realms, custom
-domains, IP allow/deny rules, environment variables and extensions. Organizations (teams) and
+domains, IP allow/deny rules, environment variables, extensions, and Gateway apps that put a
+realm's login in front of an existing website. Organizations (teams) and
 payment methods are **referenced, not managed** — both involve flows that only make sense in a
 browser, so you create them in the Phase Two console and look them up here.
 
@@ -119,6 +120,13 @@ provider keeps the last applied value in state and cannot detect a change made o
 `domain_records`; create them at your DNS provider, and only then point
 `phasetwo_cluster_primary_host` at the domain. `wait_for_certificate` is off by default because
 turning it on in the same apply that creates those records would deadlock.
+
+**A Gateway app's `origin_secret` is in state.** The API returns it once, on create, so the
+provider keeps it; treat the state as secret. Going live is a separate
+`phasetwo_gateway_app_activation`, because it has to wait for the CNAME and the origin
+configuration you create from the app's outputs. It fails at once if the origin serves requests
+without the secret. Rotating the secret is not modelled: after a rotation in the console the
+value in state is stale, and the new one has to reach your origin some other way.
 
 **Tier limits are enforced by the API** and surface as 409s:
 
